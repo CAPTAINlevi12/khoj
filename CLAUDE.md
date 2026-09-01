@@ -86,7 +86,8 @@ back to him as an exercise unless he asks.
 | Decision | Why |
 |---|---|
 | Custom user model from the first migration | `AUTH_USER_MODEL = "accounts.User"`, subclassing `AbstractUser` with `role` / `phone` / `organisation`. Set before the first `migrate` so auth and admin FKs point at the right table. Changing it later is a rewrite. |
-| SQLite now, PostgreSQL at Phase 8 | Postgres is needed for trigram similarity — Nepali names transliterate many ways (Shrestha / Shreshtha / Sreshtha). Not needed before then. |
+| PostgreSQL from the start (moved up from Phase 8) | Originally planned as SQLite-until-Phase-8, but Abhinav already had Postgres 18 installed locally (`D:\postgre`), so switched immediately rather than migrating later. Trigram similarity for Nepali name variants (Shrestha / Shreshtha / Sreshtha) still lands in Phase 8 — that phase is now "add trigram search" only, not "migrate database". |
+| Django 6.1, not 5.1.5 as originally pinned | Global Python is 3.14.6, which Django 5.1 does not officially support. Bumped to 6.1 rather than pin an unsupported combination. |
 | Secrets via `.env` + `python-dotenv` + `os.getenv()` | `.env` is gitignored; `.env.example` is committed. Never commit `.env`. |
 | Bootstrap 5 via CDN | Not a frontend project. Structure over skin. |
 | Project-wide `templates/` plus per-app template dirs | `DIRS` for shared, `APP_DIRS` for app-local. |
