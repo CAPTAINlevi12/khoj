@@ -13,15 +13,27 @@
       <a class="navbar-brand" href="{% url 'home' %}">Khoj</a>
       <div class="ms-auto text-white-50 small">
         {% if user.is_authenticated %}
-          {{ user.username }} &middot; {{ user.get_role_display }}
+          <a class="text-white-50" href="{% url 'dashboard' %}">{{ user.username }} &middot; {{ user.get_role_display }}</a>
+          &middot;
+          <form action="{% url 'logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link btn-sm text-white-50 p-0 align-baseline">Sign out</button>
+          </form>
         {% else %}
-          Not signed in
+          <a class="text-white-50" href="{% url 'login' %}">Sign in</a>
+          &middot;
+          <a class="text-white-50" href="{% url 'register' %}">Register</a>
         {% endif %}
       </div>
     </div>
   </nav>
 
   <main class="container py-4">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 

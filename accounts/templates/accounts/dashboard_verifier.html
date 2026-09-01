@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Khoj{% endblock %}
+
+{% block content %}
+  <div class="p-4 bg-white rounded shadow-sm">
+    <h1 class="h4">Welcome, {{ user.username }}</h1>
+    <p class="text-muted">
+      Verifier dashboard. The match queue lives at
+      <a href="{% url 'verifier-queue' %}">/verifier/queue/</a>
+      (placeholder until Phase 5).
+    </p>
+  </div>
+{% endblock %}

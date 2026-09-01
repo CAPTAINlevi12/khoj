@@ -5,6 +5,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", include("accounts.urls")),
     # Everything the registry app owns hangs off the site root for now.
     path("", include("registry.urls")),
 ]

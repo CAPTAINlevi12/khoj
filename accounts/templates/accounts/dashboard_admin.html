@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Khoj{% endblock %}
+
+{% block content %}
+  <div class="p-4 bg-white rounded shadow-sm">
+    <h1 class="h4">Welcome, {{ user.username }}</h1>
+    <p class="text-muted">
+      Administrator dashboard. User management and the audit log arrive
+      alongside the features they administer, phase by phase. Django admin
+      is available now at <a href="/admin/">/admin/</a>.
+    </p>
+  </div>
+{% endblock %}
