@@ -1,13 +1,13 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Dashboard - Khoj{% endblock %}
+{% block title %}{% translate "My reports — Khoj" %}{% endblock %}
 
 {% block content %}
-  <div class="p-4 bg-white rounded shadow-sm">
-    <h1 class="h4">Welcome, {{ user.username }}</h1>
-    <p class="text-muted">
-      Family dashboard. Missing-person reports and their status will appear
-      here once Phase 2 is built.
-    </p>
+  <div class="wrap page">
+    <div class="card-plain">
+      <h1 style="font-size:1.5rem">{% blocktranslate with name=user.username %}Welcome, {{ name }}{% endblocktranslate %}</h1>
+      <p class="note">{% blocktranslate %}Your reports and their status will appear here. Filing a report arrives in Phase 2.{% endblocktranslate %}</p>
+    </div>
   </div>
 {% endblock %}

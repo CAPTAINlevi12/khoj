@@ -1,14 +1,17 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Dashboard - Khoj{% endblock %}
+{% block title %}{% translate "Verifier — Khoj" %}{% endblock %}
 
 {% block content %}
-  <div class="p-4 bg-white rounded shadow-sm">
-    <h1 class="h4">Welcome, {{ user.username }}</h1>
-    <p class="text-muted">
-      Verifier dashboard. The match queue lives at
-      <a href="{% url 'verifier-queue' %}">/verifier/queue/</a>
-      (placeholder until Phase 5).
-    </p>
+  <div class="wrap page">
+    <div class="card-plain">
+      <h1 style="font-size:1.5rem">{% blocktranslate with name=user.username %}Welcome, {{ name }}{% endblocktranslate %}</h1>
+      <p class="note">
+        {% translate "The match queue lives at" %}
+        <a href="{% url 'verifier-queue' %}">/verifier/queue/</a>
+        {% translate "(placeholder until Phase 5)." %}
+      </p>
+    </div>
   </div>
 {% endblock %}

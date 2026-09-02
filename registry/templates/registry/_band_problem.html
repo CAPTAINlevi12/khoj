@@ -1,0 +1,71 @@
+{% load i18n %}
+<section class="band" id="problem" data-band data-draw>
+  <div class="wrap">
+    <div class="band-head">
+      <p class="eyebrow">{% translate "The problem this solves" %}</p>
+      <h2>{% translate "One search, not six districts." %}</h2>
+      <p>{% blocktranslate %}After the August 2026 flood there was no central registry. Families travelled between hospitals, morgues, police posts and army camps, filing past photographs of people nobody had identified.{% endblocktranslate %}</p>
+    </div>
+
+    <div class="compare">
+      <div class="panel">
+        <h3>{% translate "Without a registry" %}</h3>
+        <p class="panel-sub">{% translate "Rasuwa → Nuwakot → Chitwan → Nawalpur → Tanahun → Pokhara" %}</p>
+
+        <svg class="map-svg" viewBox="0 0 380 210" role="img"
+             aria-label="{% translate 'Six districts joined by a long tangled route' %}">
+          <title>{% translate "A search across six districts" %}</title>
+          <path class="district" d="M30 40 L120 25 L180 55 L150 120 L60 130 Z"/>
+          <path class="district" d="M180 55 L280 40 L330 90 L250 115 Z"/>
+          <path class="district" d="M60 130 L150 120 L170 180 L80 190 Z"/>
+          <path class="district" d="M170 180 L250 115 L330 90 L340 165 L250 190 Z"/>
+
+          <path class="route draw" d="M75 70 C 130 40, 150 110, 205 80 S 260 130, 300 95
+                                       S 250 160, 200 150 S 130 175, 105 160"/>
+
+          <circle class="marker" cx="75" cy="70" r="4"/>
+          <circle class="marker" cx="205" cy="80" r="4"/>
+          <circle class="marker" cx="300" cy="95" r="4"/>
+          <circle class="marker" cx="200" cy="150" r="4"/>
+          <circle class="marker" cx="105" cy="160" r="4"/>
+          <circle class="marker" cx="255" cy="165" r="4"/>
+        </svg>
+
+        <ul class="panel-figures">
+          <li><b>4</b> {% translate "days of travelling" %}</li>
+          <li><b>102</b> {% translate "unidentified people photographed in Pokhara alone" %}</li>
+          <li><b>~1,000</b> {% translate "searchers a day filing past those photographs" %}</li>
+        </ul>
+      </div>
+
+      <div class="panel panel-good">
+        <h3>{% translate "With one" %}</h3>
+        <p class="panel-sub">{% translate "One form. An official telephones you." %}</p>
+
+        <svg class="map-svg" viewBox="0 0 380 210" role="img"
+             aria-label="{% translate 'One district marker joined by a single short line' %}">
+          <title>{% translate "One report reaches every facility" %}</title>
+          <path class="district" d="M30 40 L120 25 L180 55 L150 120 L60 130 Z"/>
+          <path class="district" d="M180 55 L280 40 L330 90 L250 115 Z"/>
+          <path class="district" d="M60 130 L150 120 L170 180 L80 190 Z"/>
+          <path class="district" d="M170 180 L250 115 L330 90 L340 165 L250 190 Z"/>
+
+          <path class="route route-direct draw" d="M105 160 C 160 150, 170 110, 190 100"/>
+
+          <circle class="marker-live" cx="105" cy="160" r="5"/>
+          <circle class="marker-live" cx="190" cy="100" r="7"/>
+        </svg>
+
+        <ul class="panel-figures">
+          <li><b>1</b> {% translate "report, filed once" %}</li>
+          <li><b>0</b> {% translate "journeys required" %}</li>
+          <li>{% translate "Contact comes to you, by telephone" %}</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:1.25rem">
+      {% blocktranslate %}Figures as reported by the Kathmandu Post and myRepublica, August 2026.{% endblocktranslate %}
+    </p>
+  </div>
+</section>

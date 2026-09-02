@@ -41,6 +41,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # LocaleMiddleware decides the active language per request. It must sit
+    # AFTER SessionMiddleware (it reads the language from the session) and
+    # BEFORE CommonMiddleware (which may redirect using the active language).
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -63,6 +67,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # Puts LANGUAGES and LANGUAGE_CODE in every template context,
+                # which the header's language toggle needs.
+                "django.template.context_processors.i18n",
             ],
         },
     },
@@ -101,10 +108,20 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "home"
 
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 TIME_ZONE = "Asia/Kathmandu"
 USE_I18N = True
 USE_TZ = True
+
+# The two languages the site offers. A Nepali family is the primary user,
+# so an English-only page would fail them; see docs/LANDING_PAGE_BRIEF.md.
+LANGUAGES = [
+    ("en", "English"),
+    ("ne", "नेपाली"),
+]
+
+# Where makemessages writes .po files and where compilemessages reads them.
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 
 # CSS/JS we write ourselves

@@ -1,31 +1,38 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Register - Khoj{% endblock %}
+{% block title %}{% translate "File a report — Khoj" %}{% endblock %}
 
 {% block content %}
-  <div class="p-4 bg-white rounded shadow-sm" style="max-width: 480px; margin: 0 auto;">
-    <h1 class="h4 mb-3">Create a family account</h1>
+  <div class="wrap form-page">
+    <div class="form-card">
+      <h1 style="font-size:1.5rem">{% translate "Create an account" %}</h1>
+      <p class="note">{% blocktranslate %}You need an account so that only you can see your report, and so an official knows how to reach you.{% endblocktranslate %}</p>
 
-    {# csrf_token: a hidden input carrying a per-session secret token.
-       CsrfViewMiddleware rejects any POST that doesn't echo it back, which
-       is what stops another site from silently submitting this form using
-       a signed-in visitor's cookies without them knowing. #}
-    <form method="post" novalidate>
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      {% for field in form %}
-        <div class="mb-3">
-          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {{ field.errors }}
-          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-        </div>
-      {% endfor %}
-      <button type="submit" class="btn btn-dark">Create account</button>
-    </form>
+      {# csrf_token: a hidden input carrying a per-session secret token.
+         CsrfViewMiddleware rejects any POST that doesn't echo it back, which
+         is what stops another site from silently submitting this form using
+         a signed-in visitor's cookies without them knowing. #}
+      <form method="post" novalidate style="margin-top:1.5rem">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+            {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary" style="width:100%">
+          {% translate "Create account" %}
+        </button>
+      </form>
 
-    <p class="mt-3 mb-0 small text-muted">
-      Already have an account? <a href="{% url 'login' %}">Sign in</a>.
-    </p>
+      <p class="note" style="margin:1.25rem 0 0">
+        {% translate "Already have an account?" %}
+        <a href="{% url 'login' %}">{% translate "Sign in" %}</a>.
+      </p>
+    </div>
   </div>
 {% endblock %}

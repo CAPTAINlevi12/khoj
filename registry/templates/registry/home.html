@@ -1,13 +1,19 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Khoj - missing persons registry{% endblock %}
+{% block title %}{% translate "Khoj — search for a missing person in one place" %}{% endblock %}
+
+{% block rail %}{% include "registry/_band_rail.html" %}{% endblock %}
 
 {% block content %}
-  <div class="p-4 bg-white rounded shadow-sm">
-    <h1 class="h3">Khoj</h1>
-    <p class="text-muted mb-0">
-      A reference design for a post-disaster missing-persons registry.
-      Scaffolding is up. Models next.
-    </p>
-  </div>
+  {% include "registry/_band_hero.html" %}
+  {% include "registry/_band_counters.html" %}
+  {% include "registry/_band_problem.html" %}
+  {% include "registry/_band_how.html" %}
+  {% include "registry/_band_match.html" %}
+  {% include "registry/_band_signals.html" %}
+  {% include "registry/_band_coverage.html" %}
+  {% include "registry/_band_trust.html" %}
+  {% include "registry/_band_offline.html" %}
+  {% include "registry/_band_questions.html" %}
 {% endblock %}

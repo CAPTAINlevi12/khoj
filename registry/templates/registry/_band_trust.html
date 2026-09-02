@@ -1,0 +1,18 @@
+{% load i18n %}
+<section class="band band-tint" id="privacy" data-band>
+  <div class="wrap">
+    <div class="band-head">
+      <p class="eyebrow">{% translate "What happens to what you tell us" %}</p>
+      <h2>{% translate "Four commitments, in plain words." %}</h2>
+    </div>
+
+    {# No lock icons, no shields: security iconography reads as marketing
+       and undercuts the point. Plain sentences carry more weight. #}
+    <ul class="commitments">
+      <li><p>{% blocktranslate %}Your report is visible to you and to the officials reviewing possible matches. Nobody else.{% endblocktranslate %}</p></li>
+      <li><p>{% blocktranslate %}Photographs are never shown publicly and never shown to other families.{% endblocktranslate %}</p></li>
+      <li><p>{% blocktranslate %}Every time an official opens a record it is recorded — who, and when.{% endblocktranslate %}</p></li>
+      <li><p>{% blocktranslate %}You can withdraw your report at any time.{% endblocktranslate %}</p></li>
+    </ul>
+  </div>
+</section>

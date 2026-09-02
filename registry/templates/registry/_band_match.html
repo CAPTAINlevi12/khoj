@@ -1,0 +1,135 @@
+{% load i18n %}
+<section class="band" id="match" data-band>
+  <div class="wrap">
+    <div class="band-head">
+      <p class="eyebrow">{% translate "How a match is found" %}</p>
+      <h2>{% translate "Turn a detail off and watch the score fall." %}</h2>
+      <p>{% blocktranslate %}Two invented records, and the same scoring rules the real system uses. A tattoo is worth more than a height estimate — which is why the details you remember matter more than the ones you guess.{% endblocktranslate %}</p>
+    </div>
+
+    {# With JS off this whole demo collapses to the weights table below,
+       which states the same lesson without any interaction. #}
+    <div class="demo-nojs panel">
+      <h3>{% translate "What each signal is worth" %}</h3>
+      <table>
+        <thead>
+          <tr><th>{% translate "Signal" %}</th><th>{% translate "Maximum points" %}</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>{% translate "Distinguishing marks" %}</td><td>25</td></tr>
+          <tr><td>{% translate "Clothing" %}</td><td>20</td></tr>
+          <tr><td>{% translate "Age" %}</td><td>18</td></tr>
+          <tr><td>{% translate "Geography and time" %}</td><td>15</td></tr>
+          <tr><td>{% translate "Height" %}</td><td>12</td></tr>
+          <tr><td>{% translate "Sex and build" %}</td><td>10</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:1rem">
+        {% translate "Below 30 is discarded. 30 to 55 is a weak candidate. Above 55 goes to a verifier." %}
+      </p>
+    </div>
+
+    <div class="demo demo-live" data-demo>
+      <div class="demo-card">
+        <h3>{% translate "Reported missing" %}</h3>
+        <p class="ref">KHJ-2847 · {% translate "fictional" %}</p>
+        <p class="note">{% translate "Switch a detail off if the family did not know it." %}</p>
+
+        <ul class="attrs">
+          <li>
+            <button type="button" class="attr demo-toggle" aria-pressed="true"
+                    data-signal="marks" data-points="25" data-max="25">
+              <span class="tick">{% include "registry/_tick.html" %}</span>
+              {% translate "Bird tattoo, left forearm" %}
+            </button>
+          </li>
+          <li>
+            <button type="button" class="attr demo-toggle" aria-pressed="true"
+                    data-signal="clothing" data-points="18" data-max="20">
+              <span class="tick">{% include "registry/_tick.html" %}</span>
+              {% translate "Red and black checked shirt" %}
+            </button>
+          </li>
+          <li>
+            <button type="button" class="attr demo-toggle" aria-pressed="true"
+                    data-signal="age" data-points="18" data-max="18">
+              <span class="tick">{% include "registry/_tick.html" %}</span>
+              {% translate "Age 34" %}
+            </button>
+          </li>
+          <li>
+            <button type="button" class="attr demo-toggle" aria-pressed="true"
+                    data-signal="geo" data-points="13" data-max="15">
+              <span class="tick">{% include "registry/_tick.html" %}</span>
+              {% translate "Last seen Timure, Rasuwa" %}
+            </button>
+          </li>
+          <li>
+            <button type="button" class="attr demo-toggle" aria-pressed="true"
+                    data-signal="height" data-points="8" data-max="12">
+              <span class="tick">{% include "registry/_tick.html" %}</span>
+              {% translate "Height about 168 cm" %}
+            </button>
+          </li>
+          <li>
+            <button type="button" class="attr demo-toggle" aria-pressed="true"
+                    data-signal="sex" data-points="4" data-max="10">
+              <span class="tick">{% include "registry/_tick.html" %}</span>
+              {% translate "Male, medium build" %}
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="demo-card score-card">
+        <h3>{% translate "Score" %}</h3>
+        <div class="score-dial">
+          <svg viewBox="0 0 130 130" aria-hidden="true">
+            <circle class="track" cx="65" cy="65" r="54"/>
+            <circle class="value" cx="65" cy="65" r="54"/>
+          </svg>
+          <div class="score-readout">
+            <b class="nums" data-score>86</b>
+            <span>{% translate "of 100" %}</span>
+          </div>
+        </div>
+
+        <ul class="breakdown">
+          <li><span>{% translate "Marks" %}</span><span class="bar"><i data-bar="marks" style="width:100%"></i></span><span class="pts" data-pts="marks">25/25</span></li>
+          <li><span>{% translate "Clothing" %}</span><span class="bar"><i data-bar="clothing" style="width:90%"></i></span><span class="pts" data-pts="clothing">18/20</span></li>
+          <li><span>{% translate "Age" %}</span><span class="bar"><i data-bar="age" style="width:100%"></i></span><span class="pts" data-pts="age">18/18</span></li>
+          <li><span>{% translate "Geography" %}</span><span class="bar"><i data-bar="geo" style="width:87%"></i></span><span class="pts" data-pts="geo">13/15</span></li>
+          <li><span>{% translate "Height" %}</span><span class="bar"><i data-bar="height" style="width:67%"></i></span><span class="pts" data-pts="height">8/12</span></li>
+          <li><span>{% translate "Sex and build" %}</span><span class="bar"><i data-bar="sex" style="width:40%"></i></span><span class="pts" data-pts="sex">4/10</span></li>
+        </ul>
+
+        <p class="verdict" data-band="surface" aria-live="polite"
+           data-text-discard="{% translate 'Below 30 — not stored at all.' %}"
+           data-text-weak="{% translate '30 to 55 — kept as a weak candidate.' %}"
+           data-text-surface="{% translate 'Above 55 — sent to a verifier.' %}"
+           data-text-marks="{% translate 'A strong marks match — always sent to a verifier.' %}">
+          {% translate "Above 55 — sent to a verifier." %}
+        </p>
+      </div>
+
+      <div class="demo-card demo-fixed">
+        <h3>{% translate "Unidentified record" %}</h3>
+        <p class="ref">PAHS-UN-104 · {% translate "fictional" %}</p>
+        <p class="note">{% translate "Filed by a facility. Fixed, for this demonstration." %}</p>
+
+        <ul class="attrs">
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Tattoo, bird, left forearm" %}</span></li>
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Checked shirt (red/black), denim trousers" %}</span></li>
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Estimated age 30 to 40" %}</span></li>
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Recovered below Betrawati, 31 km downstream" %}</span></li>
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Height 169 cm" %}</span></li>
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Male, medium build" %}</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:1.25rem">
+      {% blocktranslate %}No photograph of an unidentified person is ever shown on this page, or to a family, without a verifier deciding to show it.{% endblocktranslate %}
+    </p>
+  </div>
+</section>

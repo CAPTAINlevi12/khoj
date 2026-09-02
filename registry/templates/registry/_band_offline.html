@@ -1,0 +1,30 @@
+{% load i18n %}
+<section class="band" id="offline" data-band>
+  <div class="wrap">
+    <div class="band-head">
+      <p class="eyebrow">{% translate "If you cannot use this website" %}</p>
+      <h2>{% translate "There are three other ways in." %}</h2>
+      <p>{% blocktranslate %}Not everyone searching has a telephone that can open this page, or a connection that will load it. None of those people should be left out of the search.{% endblocktranslate %}</p>
+    </div>
+
+    <div class="routes">
+      <div class="route-card">
+        <h3>{% translate "Telephone" %}</h3>
+        <a class="big-tel mono" href="tel:+97714XXXXXX">01-XXXXXXX</a>
+        <p class="note">{% translate "Every day, 6:00 to 20:00. A person answers and files the report for you." %}</p>
+      </div>
+
+      <div class="route-card">
+        <h3>{% translate "In person" %}</h3>
+        <p>{% translate "Help desks at the district offices in Rasuwa, Nuwakot and Pokhara." %}</p>
+        <p class="note">{% translate "Bring anything you have: a photograph, a name, a description." %}</p>
+      </div>
+
+      <div class="route-card">
+        <h3>{% translate "Someone can file for you" %}</h3>
+        <p>{% translate "A relative, a neighbour or a volunteer may file on your behalf." %}</p>
+        <p class="note">{% translate "This is allowed and it is normal. They do not need your permission in writing." %}</p>
+      </div>
+    </div>
+  </div>
+</section>

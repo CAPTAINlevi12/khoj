@@ -1,0 +1,54 @@
+{% load i18n %}
+<section class="band band-tint" id="helps" data-band>
+  <div class="wrap">
+    <div class="band-head">
+      <p class="eyebrow">{% translate "What helps us find someone" %}</p>
+      <h2>{% translate "Ordered by how much each one actually helps." %}</h2>
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M12 2a5 5 0 0 0-5 5c0 3 2 4 2 7M12 2a5 5 0 0 1 5 5c0 3-2 4-2 7"/>
+          <path d="M9 18h6M10 22h4"/>
+        </svg>
+        <h3>{% translate "Scars, tattoos, dental work" %}</h3>
+        <p>{% translate "The most identifying detail there is. Worth 25 of the 100 points." %}</p>
+      </article>
+
+      <article class="card">
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M9 3 4 6v5h3v10h10V11h3V6l-5-3a3 3 0 0 1-6 0z"/>
+        </svg>
+        <h3>{% translate "What they were wearing" %}</h3>
+        <p>{% translate "Colours and patterns, as you remember them. Worth 20 points." %}</p>
+      </article>
+
+      <article class="card">
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/>
+          <circle cx="12" cy="10" r="2.5"/>
+        </svg>
+        <h3>{% translate "Where and when you last saw them" %}</h3>
+        <p>{% translate "A place name and roughly what time. Worth 15 points." %}</p>
+      </article>
+
+      <article class="card">
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M3 7h4l2-3h6l2 3h4v13H3z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <h3>{% translate "A clear photograph" %}</h3>
+        <p>{% translate "Face visible, any age. It is never shown publicly." %}</p>
+      </article>
+    </div>
+
+    <div class="callout">
+      <p>{% translate "If you are not sure about something, leave it blank. A guess is worse than a gap." %}</p>
+    </div>
+  </div>
+</section>

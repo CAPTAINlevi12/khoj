@@ -1,0 +1,48 @@
+{% load i18n %}
+<section class="band band-tint" id="questions" data-band>
+  <div class="wrap">
+    <div class="band-head">
+      <p class="eyebrow">{% translate "Questions" %}</p>
+      <h2>{% translate "Including the ones that are hard to ask." %}</h2>
+    </div>
+
+    {# Native details/summary: works without JS and is accessible for free.
+       Hand-rolling an accordion here would be strictly worse. #}
+    <div class="faq">
+      <details>
+        <summary>{% translate "Will you show me photographs of bodies?" %}</summary>
+        <div class="answer"><p>{% blocktranslate %}No. There is no gallery on this site and no way to search through photographs of people who have been recovered. If an official believes they may have found your relative, they telephone you first, and a photograph is only ever shown deliberately, by a person, with you prepared for it.{% endblocktranslate %}</p></div>
+      </details>
+
+      <details>
+        <summary>{% translate "What happens if the match is wrong?" %}</summary>
+        <div class="answer"><p>{% blocktranslate %}That is why a trained person checks every candidate before anyone is contacted, and why the system never confirms a match on its own. If a possibility is ruled out, your report stays open and the search continues.{% endblocktranslate %}</p></div>
+      </details>
+
+      <details>
+        <summary>{% translate "How long does this take?" %}</summary>
+        <div class="answer"><p>{% blocktranslate %}We cannot promise a time. A report is compared against every record already held within minutes of being filed, and against each new record as it arrives. Some reports are matched the same day. Some are never matched, and we will not pretend otherwise.{% endblocktranslate %}</p></div>
+      </details>
+
+      <details>
+        <summary>{% translate "Is this the government?" %}</summary>
+        <div class="answer"><p>{% blocktranslate %}No. This is a reference design built as a student project, running on invented data. It is not an official registry, it does not accept real reports, and it is not connected to any authority.{% endblocktranslate %}</p></div>
+      </details>
+
+      <details>
+        <summary>{% translate "What if I do not know my relative's exact age or height?" %}</summary>
+        <div class="answer"><p>{% blocktranslate %}Leave it blank. That is the honest answer and it is the useful one. A guessed height that is wrong by ten centimetres can push the right record down the list, while a blank field simply carries no weight either way.{% endblocktranslate %}</p></div>
+      </details>
+
+      <details>
+        <summary>{% translate "Can I file a report for a neighbour?" %}</summary>
+        <div class="answer"><p>{% blocktranslate %}Yes. Anyone may file on behalf of someone who cannot — a relative, a neighbour or a volunteer. Give your own telephone number as the contact so an official can reach a person who will answer.{% endblocktranslate %}</p></div>
+      </details>
+
+      <details>
+        <summary>{% translate "What happens after someone is identified?" %}</summary>
+        <div class="answer"><p>{% blocktranslate %}An official telephones the family directly — never a message, never an email alone. They explain what has been found, where the person is, and what the family needs to do next. The record is then closed and no longer appears as a possibility for anyone else.{% endblocktranslate %}</p></div>
+      </details>
+    </div>
+  </div>
+</section>

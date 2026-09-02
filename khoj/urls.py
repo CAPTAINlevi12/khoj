@@ -5,6 +5,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Gives us the set_language view the header's language toggle posts to.
+    path("i18n/", include("django.conf.urls.i18n")),
     path("", include("accounts.urls")),
     # Everything the registry app owns hangs off the site root for now.
     path("", include("registry.urls")),

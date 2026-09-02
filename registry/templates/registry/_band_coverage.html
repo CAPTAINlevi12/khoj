@@ -1,0 +1,63 @@
+{% load i18n %}
+<section class="band" id="coverage" data-band>
+  <div class="wrap">
+    <div class="band-head">
+      <p class="eyebrow">{% translate "Where we are connected" %}</p>
+      <h2>{% translate "Is the facility you are worried about part of this?" %}</h2>
+      <p>{% blocktranslate %}An inline map, not a tile layer: cell service is unreliable in exactly the places this matters, and a map that must fetch tiles is a map that does not load.{% endblocktranslate %}</p>
+    </div>
+
+    <div class="coverage">
+      <div class="panel">
+        <svg class="map-svg" viewBox="0 0 420 260" role="group"
+             aria-label="{% translate 'Districts covered' %}">
+          <title>{% translate "Connected districts" %}</title>
+          {% for d in districts %}
+            <g class="district-btn" role="button" tabindex="0"
+               data-district="{{ d.key }}" aria-pressed="false"
+               aria-label="{{ d.name }}">
+              <path class="district" d="{{ d.path }}"/>
+              <text class="label" x="{{ d.x }}" y="{{ d.y }}" text-anchor="middle">{{ d.name }}</text>
+            </g>
+          {% endfor %}
+        </svg>
+      </div>
+
+      <div class="facility-panel">
+        {% for d in districts %}
+          <div data-district-panel="{{ d.key }}" {% if not forloop.first %}hidden{% endif %}>
+            <h3>{{ d.name }}</h3>
+            <p class="note">{% blocktranslate count n=d.facilities|length %}{{ n }} facility connected{% plural %}{{ n }} facilities connected{% endblocktranslate %}</p>
+            <ul class="facility-list">
+              {% for f in d.facilities %}
+                <li>
+                  <span>{{ f.name }}</span>
+                  <span class="count">{% blocktranslate count n=f.records %}{{ n }} record{% plural %}{{ n }} records{% endblocktranslate %}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# The map is a shortcut into this list, never a replacement for it. #}
+    <h3 style="margin-top:2rem">{% translate "Every connected facility" %}</h3>
+    <div class="all-districts">
+      {% for d in districts %}
+        <div class="panel">
+          <h3>{{ d.name }}</h3>
+          <ul class="facility-list">
+            {% for f in d.facilities %}
+              <li><span>{{ f.name }}</span><span class="count nums">{{ f.records }}</span></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+
+    <p class="note" style="margin-top:1.25rem">
+      {% blocktranslate %}Is your facility not listed? A hospital, morgue or police post can ask to be connected by telephoning the verification desk.{% endblocktranslate %}
+    </p>
+  </div>
+</section>

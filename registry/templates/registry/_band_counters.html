@@ -1,0 +1,37 @@
+{% load i18n %}
+<section class="band band-tint" id="numbers" data-band>
+  <div class="wrap">
+    {# The final value is rendered server-side; the count-up only animates
+       toward a number that is already correct with JS off. #}
+    <dl class="counters">
+      <div class="counter">
+        <dt>{% translate "Reports filed" %}</dt>
+        <dd class="nums" data-count="{{ stats.reports }}">{{ stats.reports }}</dd>
+      </div>
+      <div class="counter">
+        <dt>{% translate "Records held" %}</dt>
+        <dd class="nums" data-count="{{ stats.records }}">{{ stats.records }}</dd>
+      </div>
+      <div class="counter">
+        <dt>{% translate "People identified" %}</dt>
+        <dd class="nums" data-count="{{ stats.identified }}">{{ stats.identified }}</dd>
+      </div>
+      <div class="counter">
+        <dt>{% translate "Facilities connected" %}</dt>
+        <dd class="nums" data-count="{{ stats.facilities }}">{{ stats.facilities }}</dd>
+      </div>
+    </dl>
+
+    <div class="stamp">
+      {# An emergency page has to timestamp itself: a visitor has no other
+         way to tell a live service from an abandoned one. #}
+      <p class="note" style="margin:0">
+        {% translate "Last updated" %}
+        <span class="mono">29 Bhadra 2083 · 29 Aug 2026, 14:20</span>
+      </p>
+      <p class="note" style="margin:0">
+        {% translate "Counts are zero because this reference build holds no records." %}
+      </p>
+    </div>
+  </div>
+</section>

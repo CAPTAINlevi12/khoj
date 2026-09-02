@@ -1,0 +1,61 @@
+{% load i18n %}
+<section class="hero" id="hero" data-band>
+  {# The one ambient flourish on the page, and it earns its place because it
+     is the system: two populations of records converging on one point.
+     Drawn from a visible resting state, never from opacity 0. #}
+  <svg class="hero-bg" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice"
+       aria-hidden="true" focusable="false">
+    <circle cx="90" cy="100" r="3"/><circle cx="1110" cy="100" r="3"/>
+    <circle cx="90" cy="200" r="3"/><circle cx="1110" cy="200" r="3"/>
+    <circle cx="90" cy="300" r="3"/><circle cx="1110" cy="300" r="3"/>
+    <circle cx="90" cy="400" r="3"/><circle cx="1110" cy="400" r="3"/>
+    <path class="flow" d="M90 100 C 400 120, 480 250, 600 260"/>
+    <path class="flow" d="M90 200 C 400 210, 490 250, 600 260"/>
+    <path class="flow" d="M90 300 C 400 300, 490 270, 600 260"/>
+    <path class="flow" d="M90 400 C 400 390, 490 280, 600 260"/>
+    <path class="flow" d="M1110 100 C 800 120, 720 250, 600 260"/>
+    <path class="flow" d="M1110 200 C 800 210, 710 250, 600 260"/>
+    <path class="flow" d="M1110 300 C 800 300, 710 270, 600 260"/>
+    <path class="flow" d="M1110 400 C 800 390, 710 280, 600 260"/>
+    <circle cx="600" cy="260" r="6"/>
+  </svg>
+
+  <div class="wrap hero-inner">
+    <h1>{% translate "Search for a missing person in one place." %}</h1>
+    <p class="lede">
+      {% blocktranslate %}File one report. Every connected hospital, morgue and police post is searched for you, and an official will contact you directly.{% endblocktranslate %}
+    </p>
+
+    {# The two doors. Every visitor is one of exactly two people. #}
+    <div class="doors">
+      <a class="door" href="{% url 'register' %}">
+        <svg class="door-icon" width="26" height="26" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M17 11h6M20 8v6"/>
+        </svg>
+        <span>
+          <strong>{% translate "Someone I know is missing" %}</strong>
+          <span>{% translate "I want to file a report" %}</span>
+        </span>
+      </a>
+
+      <a class="door" href="{% url 'login' %}">
+        <svg class="door-icon" width="26" height="26" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M3 21h18M5 21V7l7-4 7 4v14"/>
+          <path d="M10 21v-5h4v5M9 10h1M14 10h1"/>
+        </svg>
+        <span>
+          <strong>{% translate "I have information about someone" %}</strong>
+          <span>{% translate "I work at a hospital, morgue or police post" %}</span>
+        </span>
+      </a>
+    </div>
+
+    {# What the site is actually for. Someone is deciding right now whether
+       to get on a bus. This does not move below the fold. #}
+    <p class="no-travel">{% translate "You do not need to travel." %}</p>
+  </div>
+</section>

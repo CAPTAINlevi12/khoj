@@ -1,0 +1,15 @@
+{% load i18n %}
+{# Band 0. Navigation, not content: it renders only when JS is on and the
+   viewport is wide, and its absence costs the reader nothing. #}
+<nav class="rail" aria-label="{% translate 'Page sections' %}">
+  <ul>
+    {% for id, label in rail_sections %}
+      <li>
+        <button type="button" data-target="{{ id }}" aria-current="false">
+          <span class="visually-hidden">{{ label }}</span>
+        </button>
+        <span class="rail-label" aria-hidden="true">{{ label }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
