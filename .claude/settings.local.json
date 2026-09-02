@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-CimInstance Win32_Service -Filter \"Name='postgresql-x64-18'\")",
+      "Bash(\"/d/postgre/bin/psql.exe\" -U postgres -h localhost -c \"SELECT version\\(\\);\")",
+      "Bash(cp \"/d/postgre/data/pg_hba.conf\" \"/d/postgre/data/pg_hba.conf.bak\" && echo \"backed up\")",
+      "PowerShell($pw = -join \\(\\(48..57\\)+\\(65..90\\)+\\(97..122\\) | Get-Random -Count 24 | ForEach-Object {[char]$_}\\); Set-Content -Path \"$env:TEMP\\\\khoj_pg_pw.txt\" -Value $pw -NoNewline; Write-Output $pw)",
+      "PowerShell(Restart-Service -Name \"postgresql-x64-18\" -Force)",
+      "PowerShell(Get-Service -Name \"postgresql-x64-18\")",
+      "Bash(\"/d/postgre/bin/pg_ctl.exe\" reload *)",
+      "Bash(\"/d/postgre/bin/psql.exe\" -U postgres -h 127.0.0.1 -c \"SELECT 1;\")",
+      "Bash(\"/d/postgre/bin/psql.exe\" -U postgres -h 127.0.0.1 -v ON_ERROR_STOP=1 -c \"CREATE DATABASE khoj;\")",
+      "Bash(python manage.py migrate)",
+      "Bash(python -m pip install --no-cache-dir -r requirements.txt)",
+      "Bash(python -m pip show python-dotenv Django psycopg2-binary Pillow)",
+      "Bash(python -m pip install --no-cache-dir python-dotenv==1.0.1 \"Pillow>=12.0\")",
+      "Bash(python manage.py check)",
+      "Bash(DJANGO_SUPERUSER_USERNAME=abhinav DJANGO_SUPERUSER_EMAIL=abhinav@example.com DJANGO_SUPERUSER_PASSWORD=ay80qp36 python manage.py createsuperuser --noinput)",
+      "Bash(curl -s -o /dev/null -w \"home: %{http_code}\\\\n\" http://127.0.0.1:8000/)",
+      "Bash(curl -s -o /dev/null -w \"login: %{http_code}\\\\n\" http://127.0.0.1:8000/login/)",
+      "Bash(curl -s -o /dev/null -w \"register: %{http_code}\\\\n\" http://127.0.0.1:8000/register/)",
+      "Bash(curl -s -o /dev/null -w \"verifier queue \\(anon\\): %{http_code}\\\\n\" http://127.0.0.1:8000/verifier/queue/)",
+      "Bash(curl -s -o /dev/null -w \"admin: %{http_code}\\\\n\" http://127.0.0.1:8000/admin/)",
+      "Bash(curl -s -b /tmp/cookies.txt http://127.0.0.1:8000/dashboard/)"
+    ],
+    "additionalDirectories": [
+      "D:\\postgre\\data"
+    ]
+  }
+}
