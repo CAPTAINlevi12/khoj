@@ -51,15 +51,23 @@ def home(request):
     connected. Nepal is the row that happens to be loaded, not a constant
     typed into a template.
     """
-    event = Event.objects.filter(is_primary=True).first()
+    # Each prefetch_related entry costs exactly one extra query no matter how
+    # many rows come back, and it populates a cache that `.all()` reads from
+    # afterwards. That matters here because several of these relations are
+    # rendered twice on the page — without the cache, every `{% for %}` would
+    # be another round trip. "regions__organisations" follows the relation two
+    # levels deep, which is what keeps the coverage band flat.
+    event = (
+        Event.objects.filter(is_primary=True)
+        .prefetch_related(
+            "regions__organisations",
+            "figures",
+            "help_desks__region",
+        )
+        .first()
+    )
 
-    # prefetch_related pulls every region's organisations in one extra query
-    # instead of one query per region — the N+1 problem, and the coverage band
-    # is exactly where it would bite.
-    if event:
-        districts = event.regions.prefetch_related("organisations")
-    else:
-        districts = Region.objects.none()
+    districts = event.regions.all() if event else Region.objects.none()
 
     return render(
         request,

@@ -70,6 +70,10 @@ TEMPLATES = [
                 # Puts LANGUAGES and LANGUAGE_CODE in every template context,
                 # which the header's language toggle needs.
                 "django.template.context_processors.i18n",
+                # Puts the primary event in every template context, so the
+                # header and footer can show its telephone number on pages
+                # whose view knows nothing about events.
+                "registry.context_processors.primary_event",
             ],
         },
     },

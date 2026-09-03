@@ -643,3 +643,26 @@ a:hover { text-decoration-thickness: 2px; }
   html { scroll-behavior: auto; }
   .js .draw { stroke-dashoffset: 0; }
 }
+
+/* ------------------------------------------------ event context strip
+   Says what the system is, and which disaster is loaded into it. Quiet by
+   design: it is orientation, not an alert. */
+
+.event-strip { background: var(--surface); border-bottom: 1px solid var(--line); }
+.event-strip-inner {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem;
+  align-items: baseline; padding-block: 0.7rem;
+}
+.event-what { margin: 0; font-size: 0.8125rem; font-weight: 600; color: var(--ink); }
+.event-now {
+  margin: 0; margin-left: auto; display: flex; flex-wrap: wrap;
+  gap: 0.5rem; align-items: baseline;
+  font-size: 0.8125rem; color: var(--ink-soft);
+}
+.event-now b { color: var(--ink); font-weight: 600; }
+.event-meta { color: var(--ink-soft); }
+.event-dot {
+  flex: none; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--line-strong); align-self: center;
+}
+.event-dot.live { background: var(--green); }

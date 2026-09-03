@@ -12,7 +12,22 @@ from datetime import date
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from registry.models import Event, Organisation, Region
+from registry.models import Event, EventFigure, HelpDesk, Organisation, Region
+
+# Reported figures, kept with the source they came from. Nothing here is
+# invented — a fabricated number on a page about missing people is a lie with
+# a particularly bad shape.
+FIGURES = [
+    ("4", "days of travelling", "Kathmandu Post, 31 Aug 2026"),
+    ("102", "unidentified people photographed in Pokhara alone", "Kathmandu Post, 31 Aug 2026"),
+    ("~1,000", "searchers a day filing past those photographs", "myRepublica, Aug 2026"),
+]
+
+HELP_DESKS = [
+    ("Rasuwa district office", "Rasuwa"),
+    ("Nuwakot district office", "Nuwakot"),
+    ("Pokhara verification desk", "Kaski"),
+]
 
 # SVG paths are in the coverage map's 420x250 viewBox. Shapes are indicative,
 # not survey data — this is seeded fictional content.
@@ -67,7 +82,11 @@ class Command(BaseCommand):
             name="Nepal", kind=Region.Kind.COUNTRY
         )
 
-        event, created = Event.objects.get_or_create(
+        # update_or_create, not get_or_create: `defaults` is only applied on
+        # CREATE by get_or_create, so re-running after adding a field would
+        # silently leave existing rows without it. This command has to be
+        # re-runnable, so it must write the fields every time.
+        event, created = Event.objects.update_or_create(
             slug="bhotekoshi-2026",
             defaults={
                 "name": "Bhotekoshi and Trishuli flood",
@@ -75,6 +94,8 @@ class Command(BaseCommand):
                 "status": Event.Status.ACTIVE,
                 "occurred_on": date(2026, 8, 26),
                 "is_primary": True,
+                "hotline_phone": "01-XXXXXXX",
+                "hotline_hours": "Every day, 6:00 to 20:00",
                 "summary": (
                     "A glacier collapse on the north face of Langtang-Lirung sent a "
                     "debris flow down the Bhotekoshi and Trishuli valleys, across "
@@ -101,6 +122,23 @@ class Command(BaseCommand):
                     name=org_name,
                     defaults={"kind": org_kind, "region": region},
                 )
+
+        for order, (value, label, source) in enumerate(FIGURES):
+            EventFigure.objects.update_or_create(
+                event=event,
+                label=label,
+                defaults={"value": value, "source": source, "order": order},
+            )
+
+        for order, (name, region_name) in enumerate(HELP_DESKS):
+            HelpDesk.objects.update_or_create(
+                event=event,
+                name=name,
+                defaults={
+                    "region": Region.objects.filter(name=region_name).first(),
+                    "order": order,
+                },
+            )
 
         verb = "Created" if created else "Updated"
         self.stdout.write(

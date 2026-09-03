@@ -81,6 +81,11 @@ class Event(models.Model):
     # or years after recovery ends, not when the news coverage stops.
     closed_on = models.DateField(null=True, blank=True)
 
+    # The route for people who cannot use the website at all. Per-event,
+    # because a different deployment answers a different telephone.
+    hotline_phone = models.CharField(max_length=32, blank=True)
+    hotline_hours = models.CharField(max_length=120, blank=True)
+
     # The event the bare landing page describes when it has to pick one.
     # Several events can be ACTIVE at once — a country can have two disasters
     # — so "active" cannot double as "the one to show".
@@ -160,3 +165,51 @@ class Organisation(models.Model):
         relation count then. Zero is the honest number in the meantime.
         """
         return 0
+
+
+class EventFigure(models.Model):
+    """One cited figure describing what went wrong in this event.
+
+    The "without a registry" band is the case study, and every deployment has
+    a different one. Storing the figures as rows keeps them citable and keeps
+    invented numbers out: each carries the source it came from.
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="figures")
+    value = models.CharField(max_length=32)
+    label = models.CharField(max_length=200)
+    source = models.CharField(max_length=200, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.value} {self.label}"
+
+
+class HelpDesk(models.Model):
+    """A physical place a person can walk into and have a report filed for them.
+
+    This is the population Google Person Finder lost in Pakistan in 2010 — the
+    people with no connection at all — so it is data the system carries, not a
+    line typed into a template.
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="help_desks")
+    name = models.CharField(max_length=160)
+    region = models.ForeignKey(
+        Region,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="help_desks",
+    )
+    phone = models.CharField(max_length=32, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name

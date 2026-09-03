@@ -43,12 +43,14 @@
           <a class="btn" href="{% url 'login' %}">{% translate "I have information" %}</a>
         </div>
 
-        <a class="tel-link" href="tel:+97714XXXXXX">
+        {% if primary_event.hotline_phone %}
+        <a class="tel-link" href="tel:{{ primary_event.hotline_phone }}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.7 2z"/>
           </svg>
-          <span class="nums">01-XXXXXXX</span>
+          <span class="nums">{{ primary_event.hotline_phone }}</span>
         </a>
+        {% endif %}
 
         {# Language choice is a server-side POST, so it works with JS off. #}
         <form class="lang-form" action="{% url 'set_language' %}" method="post">
@@ -102,10 +104,12 @@
         <div>
           <h4>{% translate "Khoj" %}</h4>
           <p>{% blocktranslate %}A single place to file one missing-person report, so families do not have to travel between districts to search.{% endblocktranslate %}</p>
-          <p>
-            <a class="mono" href="tel:+97714XXXXXX">01-XXXXXXX</a> ·
-            {% translate "Verification desk, Rasuwa" %}
-          </p>
+          {% if primary_event.hotline_phone %}
+            <p>
+              <a class="mono" href="tel:{{ primary_event.hotline_phone }}">{{ primary_event.hotline_phone }}</a>
+              {% if primary_event.hotline_hours %}· {{ primary_event.hotline_hours }}{% endif %}
+            </p>
+          {% endif %}
         </div>
 
         <div>

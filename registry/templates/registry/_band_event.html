@@ -1,0 +1,24 @@
+{% load i18n %}
+{# States plainly what the system is and which disaster is loaded into it.
+   Without this the site reads as a Nepal site; the architecture is generic
+   but a visitor cannot see architecture. #}
+{% if event %}
+  <div class="event-strip">
+    <div class="wrap event-strip-inner">
+      <p class="event-what">
+        {% blocktranslate %}Khoj is a missing-persons registry for disaster response.{% endblocktranslate %}
+      </p>
+      <p class="event-now">
+        <span class="event-dot {% if event.status == 'ACTIVE' %}live{% endif %}" aria-hidden="true"></span>
+        {% if event.status == "ACTIVE" %}
+          {% translate "Currently responding to" %}
+        {% else %}
+          {% translate "Loaded event" %}
+        {% endif %}
+        <b>{{ event.name }}</b>
+        <span class="event-meta mono">{{ event.occurred_on|date:"j M Y" }}</span>
+        <span class="event-meta">{% for r in event.regions.all %}{{ r.name }}{% if not forloop.last %} &middot; {% endif %}{% endfor %}</span>
+      </p>
+    </div>
+  </div>
+{% endif %}

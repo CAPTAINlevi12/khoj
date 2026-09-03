@@ -36,9 +36,9 @@
         </svg>
 
         <ul class="panel-figures">
-          <li><b>4</b> {% translate "days of travelling" %}</li>
-          <li><b>102</b> {% translate "unidentified people photographed in Pokhara alone" %}</li>
-          <li><b>~1,000</b> {% translate "searchers a day filing past those photographs" %}</li>
+          {% for figure in event.figures.all %}
+            <li><b>{{ figure.value }}</b> {{ figure.label }}</li>
+          {% endfor %}
         </ul>
       </div>
 
@@ -68,8 +68,12 @@
       </div>
     </div>
 
+    {# Sources come from the rows themselves, so a figure can never appear
+       on this page without one attached to it. #}
     <p class="note" style="margin-top:1.25rem">
-      {% blocktranslate %}Figures as reported by the Kathmandu Post and myRepublica, August 2026.{% endblocktranslate %}
+      {% translate "Figures as reported by" %}
+      {% regroup event.figures.all by source as source_list %}
+      {% for group in source_list %}{{ group.grouper }}{% if not forloop.last %}; {% endif %}{% endfor %}.
     </p>
   </div>
 </section>
