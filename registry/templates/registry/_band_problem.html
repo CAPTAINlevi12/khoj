@@ -4,7 +4,11 @@
     <div class="band-head">
       <p class="eyebrow">{% translate "The problem this solves" %}</p>
       <h2>{% translate "One search, not six districts." %}</h2>
-      <p>{% blocktranslate %}After the August 2026 flood there was no central registry. Families travelled between hospitals, morgues, police posts and army camps, filing past photographs of people nobody had identified.{% endblocktranslate %}</p>
+      {% if event %}
+        <p>{% blocktranslate with name=event.name when=event.occurred_on %}After the {{ name }} of {{ when }} there was no central registry. Families travelled between hospitals, morgues, police posts and army camps, filing past photographs of people nobody had identified.{% endblocktranslate %}</p>
+      {% else %}
+        <p>{% blocktranslate %}Without a central registry, families travel between hospitals, morgues, police posts and army camps, filing past photographs of people nobody has identified.{% endblocktranslate %}</p>
+      {% endif %}
     </div>
 
     <div class="compare">

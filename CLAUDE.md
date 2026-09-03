@@ -91,6 +91,8 @@ back to him as an exercise unless he asks.
 | Secrets via `.env` + `python-dotenv` + `os.getenv()` | `.env` is gitignored; `.env.example` is committed. Never commit `.env`. |
 | Bootstrap 5 via CDN | Not a frontend project. Structure over skin. |
 | Project-wide `templates/` plus per-app template dirs | `DIRS` for shared, `APP_DIRS` for app-local. |
+| `Event` / `Region` models — Nepal is data, not code | Khoj is a registry for sudden-onset disasters that currently has **one event loaded**, not a Nepal-specific site. Districts and facilities are rows; the landing page reads the primary event from the database. Deploying for an earthquake elsewhere is a new row. Done before Phase 2 so `MissingPersonReport` is born with the FK instead of being retrofitted. |
+| `Organisation` model pulled forward from Phase 3 | The coverage band cannot stop hardcoding facility names without it. Only the *model* moved; Phase 3 still owns responder intake and org-scoped querysets. |
 
 Apps: `accounts` (custom User), `registry` (reports, records, matches).
 
@@ -125,7 +127,7 @@ Max 100:
 | Distinguishing marks | 25 | Scars, tattoos, dental work. Near-unique. |
 | Clothing | 20 | Token overlap, colour-normalised. |
 | Age | 18 | Stated age against estimated band. |
-| Geography and time | 15 | Recovery point must be **downstream** of last-seen, within a plausible drift interval. Upstream scores zero — water goes one way. |
+| Geography and time | 15 | **The rule depends on `Event.kind`** — see `Event.geography_rule`. For a flood or glacier collapse it is `downstream`: recovery point must be downstream of last-seen within a plausible drift interval, and upstream scores zero, because water goes one way. For an earthquake or fire nothing drifts, so it is `proximity`. For a landslide, `downslope`. |
 | Height | 12 | ±4 cm full, decaying to zero at ±15 cm. |
 | Sex and build | 10 | Soft — post-mortem estimates get revised. |
 
@@ -151,11 +153,16 @@ Detail, wireframes and the "done when" test for each phase are in
 - **Phase 2 — Missing-person reports.** Model, four-step wizard, photo upload,
   own-reports list, status timeline. *Done when:* a family cannot open another
   family's report by changing the id in the URL.
-- **Phase 3 — Unidentified records.** `Organisation`, `UnidentifiedRecord`,
-  responder intake, org-scoped querysets. *Done when:* two responders in
-  different organisations see disjoint lists, proven by a test.
+- **Phase 3 — Unidentified records.** `UnidentifiedRecord`, responder intake,
+  org-scoped querysets. (`Organisation` already exists — built early, see the
+  decisions table.) *Done when:* two responders in different organisations see
+  disjoint lists, proven by a test.
 - **Phase 4 — Matching engine.** `MatchCandidate` as a `through` model, pure-Python
   scoring module (no Django imports, so it is unit-testable), management command.
+  **Scoring is scoped to one `Event`** — a Nepal report must never be compared
+  against Turkish remains, and partitioning by event is also what keeps the
+  O(reports × records) comparison tractable. The geography signal picks its
+  strategy from `Event.geography_rule`.
 - **Phase 5 — Verifier queue and comparison.** Ranked queue, side-by-side screen,
   computed agreements/disagreements, atomic state transitions, `select_for_update`.
 - **Phase 6 — Notifications.** Email/SMS on state change, queued and idempotent.
@@ -184,6 +191,20 @@ does not remove it from history.
 on this same folder (a cloud session with web search and document generation; it
 handles research, specs and design, and cannot run Windows commands). Same disk,
 no locking. **Only one writes at a time** or edits get clobbered mid-change.
+
+## Positioning — how to describe this
+
+It is **a missing-persons registry for disaster response**, seeded with the
+August 2026 Bhotekoshi flood as its worked example. Not "a Nepal flood site".
+
+The specificity is the evidence, not a limitation: the Nepal failure is
+documented in detail — families driving between six districts, no central
+registry, about a thousand people a day filing past photographs in Pokhara —
+which is why particular screens refuse particular features. Point at the
+reporting to explain why there is no photo gallery.
+
+Note also that identification work runs for **months to years** after recovery
+ends. What finishes early is the news coverage, not the problem.
 
 ## Current state
 

@@ -9,34 +9,38 @@
 
     <div class="coverage">
       <div class="panel">
-        <svg class="map-svg" viewBox="0 0 420 260" role="group"
+        <svg class="map-svg" viewBox="0 0 420 250" role="group"
              aria-label="{% translate 'Districts covered' %}">
           <title>{% translate "Connected districts" %}</title>
           {% for d in districts %}
-            <g class="district-btn" role="button" tabindex="0"
-               data-district="{{ d.key }}" aria-pressed="false"
-               aria-label="{{ d.name }}">
-              <path class="district" d="{{ d.path }}"/>
-              <text class="label" x="{{ d.x }}" y="{{ d.y }}" text-anchor="middle">{{ d.name }}</text>
-            </g>
+            {% if d.map_path %}
+              <g class="district-btn" role="button" tabindex="0"
+                 data-district="{{ d.pk }}" aria-pressed="false"
+                 aria-label="{{ d.name }}">
+                <path class="district" d="{{ d.map_path }}"/>
+                <text class="label" x="{{ d.label_x }}" y="{{ d.label_y }}" text-anchor="middle">{{ d.name }}</text>
+              </g>
+            {% endif %}
           {% endfor %}
         </svg>
       </div>
 
       <div class="facility-panel">
         {% for d in districts %}
-          <div data-district-panel="{{ d.key }}" {% if not forloop.first %}hidden{% endif %}>
+          <div data-district-panel="{{ d.pk }}" {% if not forloop.first %}hidden{% endif %}>
             <h3>{{ d.name }}</h3>
-            <p class="note">{% blocktranslate count n=d.facilities|length %}{{ n }} facility connected{% plural %}{{ n }} facilities connected{% endblocktranslate %}</p>
+            <p class="note">{% blocktranslate count n=d.organisations.count %}{{ n }} facility connected{% plural %}{{ n }} facilities connected{% endblocktranslate %}</p>
             <ul class="facility-list">
-              {% for f in d.facilities %}
+              {% for org in d.organisations.all %}
                 <li>
-                  <span>{{ f.name }}</span>
-                  <span class="count">{% blocktranslate count n=f.records %}{{ n }} record{% plural %}{{ n }} records{% endblocktranslate %}</span>
+                  <span>{{ org.name }}</span>
+                  <span class="count">{% blocktranslate count n=org.record_count %}{{ n }} record{% plural %}{{ n }} records{% endblocktranslate %}</span>
                 </li>
               {% endfor %}
             </ul>
           </div>
+        {% empty %}
+          <p class="note">{% translate "No districts are loaded yet." %}</p>
         {% endfor %}
       </div>
     </div>
@@ -48,8 +52,8 @@
         <div class="panel">
           <h3>{{ d.name }}</h3>
           <ul class="facility-list">
-            {% for f in d.facilities %}
-              <li><span>{{ f.name }}</span><span class="count nums">{{ f.records }}</span></li>
+            {% for org in d.organisations.all %}
+              <li><span>{{ org.name }}</span><span class="count nums">{{ org.record_count }}</span></li>
             {% endfor %}
           </ul>
         </div>
