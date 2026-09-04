@@ -121,14 +121,19 @@
           </ul>
         </div>
 
-        <div>
-          <h4>{% translate "Sources" %}</h4>
-          <ul class="note">
-            <li>{% translate "Kathmandu Post, Aug 2026" %}</li>
-            <li>{% translate "myRepublica, Aug 2026" %}</li>
-            <li>{% translate "UNDP Asia-Pacific, 2026" %}</li>
-          </ul>
-        </div>
+        {# Sources come from the figures actually shown on the page, so this
+           list can never drift away from what it is citing. #}
+        {% if primary_event.figures.all %}
+          <div>
+            <h4>{% translate "Sources" %}</h4>
+            <ul class="note">
+              {% regroup primary_event.figures.all by source as footer_sources %}
+              {% for group in footer_sources %}
+                {% if group.grouper %}<li>{{ group.grouper }}</li>{% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </div>
 
       <p class="disclaimer">

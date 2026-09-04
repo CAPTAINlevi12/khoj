@@ -14,7 +14,12 @@
     <div class="compare">
       <div class="panel">
         <h3>{% translate "Without a registry" %}</h3>
-        <p class="panel-sub">{% translate "Rasuwa → Nuwakot → Chitwan → Nawalpur → Tanahun → Pokhara" %}</p>
+        {# The route a family had to drive, built from the event's own regions
+           rather than typed in — otherwise this line lies on every other
+           deployment. #}
+        <p class="panel-sub">
+          {% for r in event.regions.all %}{{ r.name }}{% if not forloop.last %} → {% endif %}{% endfor %}
+        </p>
 
         <svg class="map-svg" viewBox="0 0 380 210" role="img"
              aria-label="{% translate 'Six districts joined by a long tangled route' %}">

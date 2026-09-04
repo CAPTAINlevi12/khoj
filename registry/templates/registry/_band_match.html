@@ -61,7 +61,13 @@
             <button type="button" class="attr demo-toggle" aria-pressed="true"
                     data-signal="geo" data-points="13" data-max="15">
               <span class="tick">{% include "registry/_tick.html" %}</span>
-              {% translate "Last seen Timure, Rasuwa" %}
+              {% with place=event.regions.all|first %}
+                {% if place %}
+                  {% blocktranslate with name=place.name %}Last seen in {{ name }}{% endblocktranslate %}
+                {% else %}
+                  {% translate "Last seen inside the affected area" %}
+                {% endif %}
+              {% endwith %}
             </button>
           </li>
           <li>
@@ -121,7 +127,11 @@
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Tattoo, bird, left forearm" %}</span></li>
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Checked shirt (red/black), denim trousers" %}</span></li>
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Estimated age 30 to 40" %}</span></li>
-          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Recovered below Betrawati, 31 km downstream" %}</span></li>
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{# The geography signal reads Event.geography_rule, so the demo has to say
+   what that rule actually is. "Downstream" is nonsense in an earthquake. #}
+{% if event.geography_rule == "downstream" %}{% translate "Recovered 31 km downstream of the last-seen point" %}
+{% elif event.geography_rule == "downslope" %}{% translate "Recovered downslope of the last-seen point" %}
+{% else %}{% translate "Recovered 2 km from the last-seen point" %}{% endif %}</span></li>
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Height 169 cm" %}</span></li>
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Male, medium build" %}</span></li>
         </ul>
