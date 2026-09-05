@@ -7,6 +7,7 @@ from .models import (
     RecordPhoto,
     Region,
     ReportPhoto,
+    MatchCandidate,
     UnidentifiedRecord,
 )
 
@@ -68,3 +69,10 @@ class UnidentifiedRecordAdmin(admin.ModelAdmin):
     autocomplete_fields = ("recovery_region",)
     inlines = [RecordPhotoInline]
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(MatchCandidate)
+class MatchCandidateAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "score", "state", "reviewed_by", "created_at")
+    list_filter = ("state", "event")
+    readonly_fields = ("score", "score_breakdown", "score_reasons", "created_at", "updated_at")

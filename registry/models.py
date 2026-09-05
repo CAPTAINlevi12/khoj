@@ -32,6 +32,12 @@ class Region(models.Model):
         related_name="children",
     )
 
+    # Position along the watercourse or slope, low to high. The engine's
+    # "downstream" rule compares these two numbers: water goes one way, so a
+    # body recovered upstream of where someone was last seen is not that
+    # person. Null where the ordering is unknown or meaningless.
+    flow_order = models.PositiveSmallIntegerField(null=True, blank=True)
+
     # Optional geometry so the coverage map is data, not a constant in a
     # template. map_path is an SVG path in the event's own 420x250 viewBox.
     map_path = models.TextField(blank=True)
@@ -515,3 +521,97 @@ class RecordPhoto(models.Model):
 
     def __str__(self):
         return f"Restricted photo for {self.record.custody_reference}"
+
+
+class MatchCandidate(models.Model):
+    """One pair the engine thought worth a person's attention.
+
+    This is the model the whole project is shaped around, and the reason it
+    is a model rather than a ManyToManyField. A plain M2M stores only "these
+    two are linked". Here the LINK itself has properties — how confident, who
+    reviewed it, when, and why — and the moment a relationship needs its own
+    fields it becomes a model in its own right, wired in with through=.
+
+    The machine proposes; a person decides. Nothing in this class advances
+    itself to CONFIRMED, at any score.
+    """
+
+    class State(models.TextChoices):
+        SUGGESTED = "SUGGESTED", _("Suggested by the engine")
+        UNDER_REVIEW = "UNDER_REVIEW", _("Claimed by a verifier")
+        FAMILY_CONTACTED = "FAMILY_CONTACTED", _("Family contacted")
+        CONFIRMED = "CONFIRMED", _("Confirmed the same person")
+        REJECTED = "REJECTED", _("Not the same person")
+        SUPERSEDED = "SUPERSEDED", _("Closed because the other side matched elsewhere")
+
+    report = models.ForeignKey(
+        MissingPersonReport, on_delete=models.CASCADE, related_name="candidates"
+    )
+    record = models.ForeignKey(
+        UnidentifiedRecord, on_delete=models.CASCADE, related_name="candidates"
+    )
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name="candidates", db_index=True
+    )
+
+    score = models.PositiveSmallIntegerField()
+
+    # The per-signal detail, so a verifier is never asked to trust a bare
+    # number. Principle 3: show the reasoning, not just the score.
+    score_breakdown = models.JSONField(default=dict)
+    score_reasons = models.JSONField(default=dict)
+
+    state = models.CharField(
+        max_length=20, choices=State.choices, default=State.SUGGESTED
+    )
+    reviewed_by = models.ForeignKey(
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="matches_reviewed",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    # Mandatory on REJECTED. The written reason is what stops the same wrong
+    # pair being reconsidered forever, and what an inquiry reads years later.
+    reviewer_notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-score", "-created_at"]
+        constraints = [
+            # A pair may appear once. Re-running the engine updates the row
+            # rather than stacking duplicates in front of a verifier.
+            UniqueConstraint(fields=["report", "record"], name="unique_match_pair"),
+        ]
+        indexes = [
+            models.Index(fields=["event", "state", "-score"]),
+        ]
+
+    def __str__(self):
+        return f"{self.report.reference} <-> {self.record.custody_reference} ({self.score})"
+
+    @property
+    def band(self):
+        """Where this sits against the thresholds, using the same rules the
+        engine used, rather than a second copy of the numbers."""
+        from .scoring import ALWAYS_SURFACE_MARKS_ABOVE, DISCARD_BELOW, WEAK_UPTO
+
+        if self.score_breakdown.get("marks", 0) > ALWAYS_SURFACE_MARKS_ABOVE:
+            return "surface"
+        if self.score > WEAK_UPTO:
+            return "surface"
+        if self.score >= DISCARD_BELOW:
+            return "weak"
+        return "discard"
+
+    @property
+    def is_open(self):
+        return self.state in {
+            self.State.SUGGESTED,
+            self.State.UNDER_REVIEW,
+            self.State.FAMILY_CONTACTED,
+        }

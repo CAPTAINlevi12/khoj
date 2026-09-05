@@ -34,6 +34,7 @@ HELP_DESKS = [
 DISTRICTS = [
     {
         "name": "Rasuwa",
+        "flow_order": 1,
         "map_path": "M30 40 L120 25 L180 55 L150 120 L60 130 Z",
         "label": (105, 80),
         "organisations": [
@@ -44,6 +45,7 @@ DISTRICTS = [
     },
     {
         "name": "Nuwakot",
+        "flow_order": 2,
         "map_path": "M180 55 L280 40 L330 90 L250 115 Z",
         "label": (255, 80),
         "organisations": [
@@ -53,6 +55,7 @@ DISTRICTS = [
     },
     {
         "name": "Chitwan",
+        "flow_order": 3,
         "map_path": "M60 130 L150 120 L170 190 L80 200 Z",
         "label": (115, 165),
         "organisations": [
@@ -62,6 +65,7 @@ DISTRICTS = [
     },
     {
         "name": "Kaski",
+        "flow_order": 4,
         "map_path": "M170 190 L250 115 L330 90 L340 175 L250 200 Z",
         "label": (265, 155),
         "organisations": [
@@ -114,6 +118,7 @@ class Command(BaseCommand):
                 defaults={"parent": nepal},
             )
             region.map_path = spec["map_path"]
+            region.flow_order = spec["flow_order"]
             region.label_x, region.label_y = spec["label"]
             region.parent = nepal
             region.save()

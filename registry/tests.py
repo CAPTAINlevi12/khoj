@@ -12,6 +12,8 @@ from django.urls import reverse
 
 from accounts.models import User
 
+from .scoring import Side, score
+
 from .models import (
     Event,
     MissingPersonReport,
@@ -289,3 +291,111 @@ class OrgScopingTests(TestCase):
         self.assertFalse(
             UnidentifiedRecord.objects.filter(custody_reference="BAD-RANGE").exists()
         )
+
+
+class ScoringTests(TestCase):
+    """The engine, exercised with plain values and no database.
+
+    This is the payoff for scoring.py importing nothing from Django: every
+    rule below is checkable in isolation, and a courtroom explanation of any
+    score has a test behind it.
+    """
+
+    def test_the_worked_example_from_the_design_spec(self):
+        """The pair the design document scores at 86."""
+        report = Side(
+            age=34, sex="MALE", height_cm=168, build="MEDIUM",
+            clothing="red and black checked shirt, blue jeans",
+            marks="tattoo of a bird on left forearm; missing upper right front tooth",
+            flow_order=1,
+        )
+        record = Side(
+            age_min=30, age_max=40, sex="MALE", height_cm=169, build="MEDIUM",
+            clothing="checked shirt red black, denim trousers",
+            marks="tattoo, bird, left forearm; upper right incisor absent",
+            flow_order=2,
+        )
+        result = score(report, record, "downstream")
+
+        self.assertEqual(result.breakdown["age"], 18, "34 sits inside 30-40")
+        self.assertEqual(result.breakdown["height"], 12, "168 vs 169 is within 4 cm")
+        self.assertEqual(result.breakdown["sex_build"], 10, "sex and build both agree")
+        self.assertGreater(result.breakdown["marks"], 15, "a tattoo in common")
+        self.assertEqual(result.band, "surface")
+
+    def test_removing_the_tattoo_collapses_the_score(self):
+        """The lesson the public demonstration page teaches."""
+        base = dict(age=34, sex="MALE", height_cm=168, build="MEDIUM",
+                    clothing="red checked shirt", flow_order=1)
+        record = Side(age_min=30, age_max=40, sex="MALE", height_cm=169,
+                      build="MEDIUM", clothing="red checked shirt",
+                      marks="tattoo bird left forearm", flow_order=1)
+
+        with_marks = score(Side(marks="tattoo bird left forearm", **base), record)
+        without = score(Side(marks="", **base), record)
+
+        self.assertGreater(with_marks.total, without.total)
+        self.assertEqual(without.breakdown["marks"], 0)
+
+    def test_water_goes_one_way(self):
+        """Upstream recovery scores zero however well everything else agrees."""
+        report = Side(flow_order=3)
+        upstream = Side(flow_order=1)
+        downstream = Side(flow_order=4)
+
+        self.assertEqual(score(report, upstream, "downstream").breakdown["geography"], 0)
+        self.assertGreater(score(report, downstream, "downstream").breakdown["geography"], 0)
+
+    def test_an_earthquake_does_not_use_the_downstream_rule(self):
+        """Nothing drifts in an earthquake, so proximity is the whole signal."""
+        report = Side(flow_order=3, region_id=7)
+        elsewhere = Side(flow_order=9, region_id=8)
+        same_place = Side(flow_order=1, region_id=7)
+
+        self.assertEqual(score(report, elsewhere, "proximity").breakdown["geography"], 0)
+        self.assertEqual(score(report, same_place, "proximity").breakdown["geography"], 15)
+
+    def test_age_outside_the_band_decays(self):
+        report = Side(age=34)
+        self.assertEqual(score(report, Side(age_min=30, age_max=40)).breakdown["age"], 18)
+        self.assertEqual(score(report, Side(age_min=60, age_max=70)).breakdown["age"], 0)
+        middling = score(report, Side(age_min=38, age_max=45)).breakdown["age"]
+        self.assertTrue(0 < middling < 18)
+
+    def test_height_tolerance(self):
+        report = Side(height_cm=168)
+        self.assertEqual(score(report, Side(height_cm=170)).breakdown["height"], 12)
+        self.assertEqual(score(report, Side(height_cm=190)).breakdown["height"], 0)
+
+    def test_blank_fields_score_zero_rather_than_penalising(self):
+        """Blank beats guessed: an empty field must not push a pair below the
+        line, it must simply contribute nothing."""
+        result = score(Side(), Side())
+        self.assertEqual(result.total, 0)
+        self.assertEqual(result.band, "discard")
+
+    def test_colour_synonyms_are_folded(self):
+        """'maroon kurta' against 'red kurta' should score, not zero."""
+        a = Side(clothing="maroon kurta")
+        b = Side(clothing="red kurta")
+        self.assertGreater(score(a, b).breakdown["clothing"], 0)
+
+    def test_a_strong_marks_hit_always_surfaces(self):
+        """A tattoo match outranks every other disagreement."""
+        report = Side(marks="tattoo bird left forearm")
+        record = Side(marks="tattoo bird left forearm")
+        result = score(report, record)
+        self.assertLess(result.total, 55, "nothing else agrees")
+        self.assertEqual(result.band, "surface")
+
+    def test_below_thirty_is_not_stored(self):
+        result = score(Side(height_cm=168), Side(height_cm=169))
+        self.assertLess(result.total, 30)
+        self.assertFalse(result.is_worth_storing)
+
+    def test_every_signal_carries_a_reason(self):
+        """A verifier is never shown a bare number."""
+        result = score(Side(age=34), Side(age_min=30, age_max=40))
+        for signal in result.breakdown:
+            with self.subTest(signal=signal):
+                self.assertTrue(result.reasons[signal], "every signal explains itself")
