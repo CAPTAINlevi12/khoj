@@ -1,0 +1,24 @@
+# Normalise line endings so a diff shows what actually changed.
+#
+# Without this, the repo inherits each machine's core.autocrlf setting. On
+# Windows that is usually true, which rewrites every file's endings and turns
+# a one-line fix into a several-hundred-line diff. A real bug then hides
+# inside the noise during review.
+#
+# text=auto  -> git decides per file whether it is text
+# eol=lf     -> text files are stored AND checked out with LF everywhere
+* text=auto eol=lf
+
+# Files that must never be touched: a stray CR would corrupt them.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.sqlite3 binary
