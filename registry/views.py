@@ -274,3 +274,86 @@ class ReportWithdrawView(OwnReportsMixin, DetailView):
         report.save(update_fields=["status", "updated_at"])
         messages.success(request, _("Your report has been withdrawn."))
         return redirect("report-list")
+
+
+# =====================================================================
+# Phase 3 · unidentified records (the responder's side)
+# =====================================================================
+
+from accounts.mixins import RoleRequiredMixin
+from accounts.models import User
+
+from .forms import UnidentifiedRecordForm
+from .models import UnidentifiedRecord
+
+
+class OrgScopedMixin(RoleRequiredMixin):
+    """Every record lookup is confined to the responder's own organisation.
+
+    This is the same lesson as OwnReportsMixin one level up: the boundary
+    lives in get_queryset(), so a record belonging to another facility is
+    never fetched and there is no moment where the view holds it and might
+    forget to check.
+
+    Verifiers and administrators see every record, because their job is to
+    compare the two sides — which is exactly why RoleRequiredMixin gates this
+    and a family account never reaches it at all.
+    """
+
+    model = UnidentifiedRecord
+    allowed_roles = [User.Role.RESPONDER, User.Role.VERIFIER, User.Role.ADMIN]
+
+    def get_queryset(self):
+        queryset = UnidentifiedRecord.objects.select_related(
+            "organisation", "recovery_region"
+        )
+        user = self.request.user
+        if user.role == User.Role.RESPONDER:
+            return queryset.filter(organisation=user.organisation)
+        return queryset
+
+
+class RecordListView(OrgScopedMixin, ListView):
+    """What this facility is holding."""
+
+    template_name = "registry/record_list.html"
+    context_object_name = "records"
+
+
+class RecordDetailView(OrgScopedMixin, DetailView):
+    template_name = "registry/record_detail.html"
+    context_object_name = "record"
+
+
+class RecordCreateView(OrgScopedMixin, CreateView):
+    """Responder intake. One screen, because these arrive in batches."""
+
+    form_class = UnidentifiedRecordForm
+    template_name = "registry/record_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["event"] = get_primary_event(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        user = self.request.user
+        if user.organisation_id is None:
+            messages.error(
+                self.request,
+                _("Your account is not attached to a facility, so it cannot file records."),
+            )
+            return redirect("record-list")
+
+        # organisation and event are set from the SERVER's knowledge of who
+        # is signed in, never from the submitted form. A field the browser
+        # can send is a field the browser can change.
+        form.instance.organisation = user.organisation
+        form.instance.event = get_primary_event(self.request)
+        form.instance.filed_by = user
+        self.object = form.save()
+
+        messages.success(self.request, _("Record saved."))
+        if "save_and_add" in self.request.POST:
+            return redirect("record-new")
+        return redirect("record-detail", pk=self.object.pk)

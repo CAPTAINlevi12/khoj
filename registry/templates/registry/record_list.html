@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Records held — Khoj" %}{% endblock %}
+
+{% block content %}
+  <div class="wrap page">
+    <div style="display:flex;gap:1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:1.5rem">
+      <h1 style="font-size:1.5rem;margin:0">{% translate "Records held" %}</h1>
+      {% if user.organisation %}<span class="note">{{ user.organisation.name }}</span>{% endif %}
+      <a class="btn btn-primary" style="margin-left:auto" href="{% url 'record-new' %}">
+        {% translate "New record" %}
+      </a>
+    </div>
+
+    {% for record in records %}
+      <article class="card-plain" style="margin-bottom:.75rem">
+        <div style="display:flex;gap:1rem;align-items:baseline;flex-wrap:wrap">
+          <h2 style="font-size:1rem;margin:0">
+            <a class="mono" href="{% url 'record-detail' record.pk %}">{{ record.custody_reference }}</a>
+          </h2>
+          <span class="status-pill status-{{ record.status|lower }}">{{ record.get_status_display }}</span>
+          <span class="note" style="margin-left:auto">{{ record.organisation.name }}</span>
+        </div>
+        <p class="note" style="margin:.4rem 0 0">
+          {% translate "Est. age" %} {{ record.age_range_display }} ·
+          {{ record.get_sex_display }} ·
+          {% if record.height_cm %}{{ record.height_cm }} cm · {% endif %}
+          {{ record.recovery_location|default:"—" }}
+        </p>
+      </article>
+    {% empty %}
+      <div class="card-plain">
+        <p>{% translate "This facility is not holding any unidentified records." %}</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

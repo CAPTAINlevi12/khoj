@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ record.custody_reference }} — Khoj{% endblock %}
+
+{% block content %}
+  <div class="wrap page" style="max-width:46rem">
+    <div class="card-plain">
+      <div style="display:flex;gap:1rem;align-items:baseline;flex-wrap:wrap">
+        <h1 class="mono" style="font-size:1.25rem;margin:0">{{ record.custody_reference }}</h1>
+        <span class="status-pill status-{{ record.status|lower }}">{{ record.get_status_display }}</span>
+      </div>
+      <p class="note" style="margin:.4rem 0 0">{{ record.organisation.name }}</p>
+
+      <dl class="review">
+        <dt>{% translate "Estimated age" %}</dt><dd>{{ record.age_range_display }}</dd>
+        <dt>{% translate "Sex" %}</dt><dd>{{ record.get_sex_display }}</dd>
+        <dt>{% translate "Height" %}</dt><dd>{% if record.height_cm %}{{ record.height_cm }} cm{% else %}—{% endif %}</dd>
+        <dt>{% translate "Build" %}</dt><dd>{{ record.get_build_display }}</dd>
+        <dt>{% translate "Recovered" %}</dt>
+        <dd>{{ record.recovered_at|default:"—" }}{% if record.recovery_location %} · {{ record.recovery_location }}{% endif %}</dd>
+        <dt>{% translate "Clothing" %}</dt><dd>{{ record.clothing_description|default:"—" }}</dd>
+        <dt>{% translate "Marks" %}</dt><dd>{{ record.distinguishing_marks|default:"—" }}</dd>
+      </dl>
+
+      {% comment %} Photographs are deliberately NOT rendered. They live outside the
+         public media root and need the permission-checked, audit-logged view
+         that Phase 7 builds. Until then, nothing shows them to a browser. {% endcomment %}
+      {% if record.photos.count %}
+        <p class="note" style="margin-top:1.25rem">
+          {% blocktranslate count n=record.photos.count %}{{ n }} restricted photograph held. Viewing requires the audited view built in Phase 7.{% plural %}{{ n }} restricted photographs held. Viewing requires the audited view built in Phase 7.{% endblocktranslate %}
+        </p>
+      {% endif %}
+
+      <p style="margin-top:1.5rem"><a class="btn btn-quiet" href="{% url 'record-list' %}">{% translate "All records" %}</a></p>
+    </div>
+  </div>
+{% endblock %}

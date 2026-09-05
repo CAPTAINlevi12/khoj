@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "New unidentified record — Khoj" %}{% endblock %}
+
+{% block content %}
+  <div class="wrap page" style="max-width:46rem">
+    <div class="card-plain">
+      <h1 style="font-size:1.375rem">{% translate "New unidentified record" %}</h1>
+      <p class="note">{% blocktranslate %}Use the same words a family would use. The two descriptions are compared directly, so shared vocabulary is what makes a match possible.{% endblocktranslate %}</p>
+
+      <form method="post" novalidate style="margin-top:1.5rem">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+            {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+          </div>
+        {% endfor %}
+
+        <div class="callout" style="margin-bottom:1.25rem">
+          <p>{% translate "Uploaded photographs are stored outside the public media root and served only to authorised roles. Every access is logged." %}</p>
+        </div>
+
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button type="submit" class="btn btn-primary">{% translate "Save record" %}</button>
+          <button type="submit" name="save_and_add" value="1" class="btn">{% translate "Save and add another" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

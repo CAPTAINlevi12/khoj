@@ -26,4 +26,10 @@ urlpatterns = [
     path("reports/<int:pk>/submit/", views.ReportSubmitView.as_view(), name="report-submit"),
     path("reports/<int:pk>/photo/", views.ReportPhotoView.as_view(), name="report-photo"),
     path("reports/<int:pk>/withdraw/", views.ReportWithdrawView.as_view(), name="report-withdraw"),
+
+    # Phase 3 · unidentified records. Scoped to the responder's own
+    # organisation in the queryset, not by hiding links.
+    path("records/", views.RecordListView.as_view(), name="record-list"),
+    path("records/new/", views.RecordCreateView.as_view(), name="record-new"),
+    path("records/<int:pk>/", views.RecordDetailView.as_view(), name="record-detail"),
 ]

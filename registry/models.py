@@ -398,3 +398,120 @@ class ReportPhoto(models.Model):
 
     def __str__(self):
         return f"Photo for {self.report.reference}"
+
+
+class UnidentifiedRecord(models.Model):
+    """The responder's side: a person recovered but not yet identified.
+
+    Deliberately parallel to MissingPersonReport, field for field, because
+    the matching engine can only compare what is described in the same
+    vocabulary. The asymmetry that remains is the real difficulty of the
+    domain: a family knows an exact age, a mortuary knows a range; a family
+    guesses a height, a mortuary measures one.
+    """
+
+    class Status(models.TextChoices):
+        HELD = "HELD", _("Held, unidentified")
+        UNDER_REVIEW = "UNDER_REVIEW", _("A possible match is being reviewed")
+        IDENTIFIED = "IDENTIFIED", _("Identified")
+        RELEASED = "RELEASED", _("Released to family")
+
+    organisation = models.ForeignKey(
+        Organisation,
+        on_delete=models.PROTECT,
+        related_name="records",
+        db_index=True,
+    )
+    event = models.ForeignKey(
+        Event, on_delete=models.PROTECT, related_name="records", db_index=True
+    )
+    filed_by = models.ForeignKey(
+        "accounts.User", on_delete=models.PROTECT, related_name="records_filed"
+    )
+
+    # The physical body can always be found again from the digital record.
+    custody_reference = models.CharField(
+        max_length=64,
+        help_text=_("The reference your facility holds this person under."),
+    )
+
+    # --- estimated, not stated. This is the asymmetry with the family form.
+    estimated_age_min = models.PositiveSmallIntegerField(null=True, blank=True)
+    estimated_age_max = models.PositiveSmallIntegerField(null=True, blank=True)
+    sex = models.CharField(max_length=10, choices=Sex.choices, default=Sex.UNKNOWN)
+    height_cm = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text=_("Measured, not estimated, where possible.")
+    )
+    build = models.CharField(max_length=10, choices=Build.choices, default=Build.UNKNOWN)
+
+    # --- recovery, the mirror of last-seen -------------------------------
+    recovered_at = models.DateTimeField(null=True, blank=True)
+    recovery_location = models.CharField(max_length=200, blank=True)
+    recovery_region = models.ForeignKey(
+        Region,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="records_recovered",
+    )
+
+    # --- the comparable descriptions --------------------------------------
+    clothing_description = models.TextField(blank=True)
+    distinguishing_marks = models.TextField(
+        blank=True,
+        help_text=_("Scars, tattoos, dental work, amputations, old fractures."),
+    )
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.HELD)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            # One custody reference per organisation. Two facilities may
+            # legitimately use the same numbering, so the uniqueness is on
+            # the pair, not the reference alone.
+            UniqueConstraint(
+                fields=["organisation", "custody_reference"],
+                name="unique_custody_reference_per_organisation",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["organisation", "-created_at"]),
+            models.Index(fields=["event", "status"]),
+        ]
+
+    def __str__(self):
+        return self.custody_reference
+
+    @property
+    def age_range_display(self):
+        low, high = self.estimated_age_min, self.estimated_age_max
+        if low and high:
+            return f"{low}–{high}"
+        return str(low or high or "—")
+
+
+class RecordPhoto(models.Model):
+    """A post-mortem photograph. Restricted, and every read is logged.
+
+    upload_to is a private prefix rather than the public media root. Phase 7
+    serves these through a permission-checked view and writes an AuditEvent
+    on every access — principle 5, every READ of a sensitive record is a
+    logged event, not only every write.
+
+    Until that view exists, nothing renders these to a browser.
+    """
+
+    record = models.ForeignKey(
+        UnidentifiedRecord, on_delete=models.CASCADE, related_name="photos"
+    )
+    image = models.ImageField(upload_to="restricted/records/%Y/%m/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["uploaded_at"]
+
+    def __str__(self):
+        return f"Restricted photo for {self.record.custody_reference}"

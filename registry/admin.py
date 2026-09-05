@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from .models import Event, MissingPersonReport, Organisation, Region, ReportPhoto
+from .models import (
+    Event,
+    MissingPersonReport,
+    Organisation,
+    RecordPhoto,
+    Region,
+    ReportPhoto,
+    UnidentifiedRecord,
+)
 
 
 @admin.register(Region)
@@ -45,3 +53,18 @@ class MissingPersonReportAdmin(admin.ModelAdmin):
     @admin.display(description="Reference")
     def reference(self, obj):
         return obj.reference
+
+
+class RecordPhotoInline(admin.TabularInline):
+    model = RecordPhoto
+    extra = 0
+
+
+@admin.register(UnidentifiedRecord)
+class UnidentifiedRecordAdmin(admin.ModelAdmin):
+    list_display = ("custody_reference", "organisation", "age_range_display", "sex", "status")
+    list_filter = ("status", "organisation", "sex")
+    search_fields = ("custody_reference", "distinguishing_marks")
+    autocomplete_fields = ("recovery_region",)
+    inlines = [RecordPhotoInline]
+    readonly_fields = ("created_at", "updated_at")

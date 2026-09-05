@@ -28,8 +28,24 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True)
 
     # Which organisation a responder belongs to (hospital, police post, NGO).
-    # Blank for ordinary family accounts.
-    organisation = models.CharField(max_length=120, blank=True)
+    # Null for ordinary family accounts.
+    #
+    # A ForeignKey rather than a name, because this is what SCOPES a
+    # responder's queryset in Phase 3 — a nurse in Pokhara has no business
+    # reading Chitwan's records. Matching on a typed string would make that
+    # boundary depend on spelling.
+    #
+    # The model is named as a string, "registry.Organisation", so accounts
+    # does not have to import registry — registry already refers to
+    # "accounts.User" the same way, and importing both directions would be a
+    # circular import.
+    organisation = models.ForeignKey(
+        "registry.Organisation",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="staff",
+    )
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"

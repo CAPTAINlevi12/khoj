@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from .models import MissingPersonReport, ReportPhoto
+from .models import MissingPersonReport, ReportPhoto, UnidentifiedRecord
 
 
 class StepForm(forms.ModelForm):
@@ -130,3 +130,75 @@ class PhotoForm(forms.ModelForm):
             "image": _("Photograph"),
             "caption": _("When was it taken?"),
         }
+
+
+class UnidentifiedRecordForm(forms.ModelForm):
+    """Responder intake.
+
+    One screen, not a wizard: these arrive in batches and the person filling
+    it in is working at speed under load. The family form is four short steps
+    because it is filled once, in distress; this one is optimised for the
+    opposite situation.
+
+    Same field vocabulary as the family form, deliberately, so the two sides
+    are genuinely comparable.
+    """
+
+    class Meta:
+        model = UnidentifiedRecord
+        fields = [
+            "custody_reference",
+            "recovered_at",
+            "recovery_location",
+            "recovery_region",
+            "estimated_age_min",
+            "estimated_age_max",
+            "sex",
+            "height_cm",
+            "build",
+            "clothing_description",
+            "distinguishing_marks",
+        ]
+        labels = {
+            "custody_reference": _("Custody reference"),
+            "recovered_at": _("Recovered at"),
+            "recovery_location": _("Recovery location"),
+            "recovery_region": _("District"),
+            "estimated_age_min": _("Estimated age from"),
+            "estimated_age_max": _("Estimated age to"),
+            "sex": _("Sex"),
+            "height_cm": _("Height in centimetres"),
+            "build": _("Build"),
+            "clothing_description": _("Clothing recovered with"),
+            "distinguishing_marks": _("Distinguishing features"),
+        }
+        widgets = {
+            "recovered_at": forms.DateTimeInput(
+                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
+            ),
+            "clothing_description": forms.Textarea(attrs={"rows": 3}),
+            "distinguishing_marks": forms.Textarea(attrs={"rows": 4}),
+        }
+
+    def __init__(self, *args, event=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name != "custody_reference":
+                field.required = False
+        if event is not None:
+            # Same trick as the family form: a field queryset is also a
+            # validation rule, so a hand-edited POST cannot attach a region
+            # belonging to another event.
+            self.fields["recovery_region"].queryset = event.regions.all()
+
+    def clean(self):
+        cleaned = super().clean()
+        low = cleaned.get("estimated_age_min")
+        high = cleaned.get("estimated_age_max")
+        if low and high and low > high:
+            # A reversed range would silently never match anyone, because the
+            # engine asks whether a stated age falls inside the band.
+            raise forms.ValidationError(
+                _("The age range is the wrong way round — 'from' must be lower than 'to'.")
+            )
+        return cleaned
