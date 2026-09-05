@@ -1,4 +1,4 @@
-from .models import Event
+from .queries import get_primary_event
 
 
 def primary_event(request):
@@ -8,10 +8,9 @@ def primary_event(request):
     dict, which Django merges into the context of every template rendered
     through the engine. base.html is rendered on every page, but only the home
     view puts `event` in its context — without this, the header telephone
-    number would be blank everywhere else.
+    number and footer sources would be blank everywhere else.
 
-    The queryset is lazy: `Event.objects.filter(...).first()` runs a query per
-    request, so it is cheap but not free. If the header grows more event data,
-    this is the place to cache it.
+    The fetch is shared with the view through get_primary_event, so a page
+    that already loaded the event does not pay for it twice.
     """
-    return {"primary_event": Event.objects.filter(is_primary=True).first()}
+    return {"primary_event": get_primary_event(request)}

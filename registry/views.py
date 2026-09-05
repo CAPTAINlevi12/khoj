@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
 from .models import Event, Region
+from .queries import get_primary_event
 
 RAIL_SECTIONS = [
     ("hero", _("Start")),
@@ -57,14 +58,15 @@ def home(request):
     # rendered twice on the page — without the cache, every `{% for %}` would
     # be another round trip. "regions__organisations" follows the relation two
     # levels deep, which is what keeps the coverage band flat.
-    event = (
-        Event.objects.filter(is_primary=True)
-        .prefetch_related(
-            "regions__organisations",
-            "figures",
-            "help_desks__region",
-        )
-        .first()
+    #
+    # Going through get_primary_event caches the row on the request, so the
+    # context processor that feeds base.html reuses it instead of fetching
+    # the same event a second time.
+    event = get_primary_event(
+        request,
+        "regions__organisations",
+        "figures",
+        "help_desks__region",
     )
 
     districts = event.regions.all() if event else Region.objects.none()
