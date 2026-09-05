@@ -44,33 +44,6 @@
     ).observe(hero);
   }
 
-  /* -------------------------------------------------- scroll rail + draw */
-
-  var bands = Array.prototype.slice.call(document.querySelectorAll("[data-band]"));
-  var railBtns = Array.prototype.slice.call(document.querySelectorAll(".rail button"));
-
-  railBtns.forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var target = document.getElementById(btn.dataset.target);
-      if (target) target.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
-    });
-  });
-
-  if (bands.length && "IntersectionObserver" in window) {
-    var railObserver = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          railBtns.forEach(function (b) {
-            b.setAttribute("aria-current", String(b.dataset.target === entry.target.id));
-          });
-        });
-      },
-      { threshold: 0.35 }
-    );
-    bands.forEach(function (b) { railObserver.observe(b); });
-  }
-
   /* ------------------------------------------------------- path drawing */
 
   // Each path is told its own length so the dash animation is exact

@@ -1,22 +1,8 @@
 from django.core.cache import cache
 from django.shortcuts import render
-from django.utils.translation import gettext_lazy as _
 
-from .models import Event, Region
+from .models import Region
 from .queries import get_primary_event
-
-RAIL_SECTIONS = [
-    ("hero", _("Start")),
-    ("numbers", _("Numbers")),
-    ("problem", _("The problem")),
-    ("how", _("How it works")),
-    ("match", _("How a match is found")),
-    ("helps", _("What helps")),
-    ("coverage", _("Where we are connected")),
-    ("privacy", _("Privacy")),
-    ("offline", _("Other ways in")),
-    ("questions", _("Questions")),
-]
 
 
 def get_stats():
@@ -47,37 +33,63 @@ def get_stats():
 def home(request):
     """Public landing page.
 
-    Everything place-specific now comes from the database: which event the
-    page describes, which districts it covers, and which facilities are
-    connected. Nepal is the row that happens to be loaded, not a constant
-    typed into a template.
+    Four sections plus the telephone routes: what this is, whether it can
+    help, what to do now. Everything explanatory is a link to one of the
+    pages below, which have room the home page does not.
     """
-    # Each prefetch_related entry costs exactly one extra query no matter how
-    # many rows come back, and it populates a cache that `.all()` reads from
-    # afterwards. That matters here because several of these relations are
-    # rendered twice on the page — without the cache, every `{% for %}` would
-    # be another round trip. "regions__organisations" follows the relation two
-    # levels deep, which is what keeps the coverage band flat.
-    #
-    # Going through get_primary_event caches the row on the request, so the
-    # context processor that feeds base.html reuses it instead of fetching
-    # the same event a second time.
-    event = get_primary_event(
-        request,
-        "regions__organisations",
-        "figures",
-        "help_desks__region",
-    )
-
-    districts = event.regions.all() if event else Region.objects.none()
+    event = get_primary_event(request, "figures", "help_desks__region")
 
     return render(
         request,
         "registry/home.html",
-        {
-            "event": event,
-            "stats": get_stats(),
-            "districts": districts,
-            "rail_sections": RAIL_SECTIONS,
-        },
+        {"event": event, "stats": get_stats()},
     )
+
+
+def how_it_works(request):
+    """Why the registry is needed, how it works, and what helps a match."""
+    return render(
+        request,
+        "registry/page_how_it_works.html",
+        {"event": get_primary_event(request, "figures", "regions")},
+    )
+
+
+def matching(request):
+    """The scoring demonstration.
+
+    Needs the event because the demo's geography line follows
+    Event.geography_rule — "downstream" is nonsense in an earthquake.
+    """
+    return render(
+        request,
+        "registry/page_matching.html",
+        {"event": get_primary_event(request, "figures", "regions")},
+    )
+
+
+def coverage(request):
+    """Which facilities take part, by district.
+
+    "regions__organisations" follows the relation two levels deep in one
+    extra query, which is what keeps this page flat however many districts
+    the event covers.
+    """
+    event = get_primary_event(request, "figures", "regions__organisations")
+    districts = event.regions.all() if event else Region.objects.none()
+
+    return render(
+        request,
+        "registry/page_coverage.html",
+        {"event": event, "districts": districts},
+    )
+
+
+def privacy(request):
+    """What happens to what a family tells us."""
+    return render(request, "registry/page_privacy.html", {})
+
+
+def questions(request):
+    """The FAQ, including the uncomfortable questions."""
+    return render(request, "registry/page_questions.html", {})

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "How it works — Khoj" %}{% endblock %}
+
+{% block content %}
+  {# Why it is needed, how it works, and what helps — in that order. #}
+  {% include "registry/_band_problem.html" %}
+  {% include "registry/_band_how.html" %}
+  {% include "registry/_band_signals.html" %}
+{% endblock %}

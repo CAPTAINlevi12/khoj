@@ -1,0 +1,36 @@
+{% load i18n %}
+{# Home's compact version of "how it works". The full stepper, the problem
+   band and the signal cards live on /how-it-works/ — home states the shape
+   and hands off. #}
+<section class="band" id="how" data-band>
+  <div class="wrap">
+    <div class="band-head" style="margin-bottom:1.5rem">
+      <p class="eyebrow">{% translate "How it works" %}</p>
+      <h2>{% translate "Three steps, and a person at the end of them." %}</h2>
+    </div>
+
+    <ol class="steps-brief">
+      <li>
+        <span class="step-n">1</span>
+        <strong>{% translate "You describe them." %}</strong>
+        <span>{% translate "What they were wearing, scars or tattoos, where they were last seen." %}</span>
+      </li>
+      <li>
+        <span class="step-n">2</span>
+        <strong>{% translate "Facilities describe who they have received." %}</strong>
+        <span>{% translate "The same details, recorded for people not yet identified." %}</span>
+      </li>
+      <li>
+        <span class="step-n">3</span>
+        <strong>{% translate "An official compares and contacts you." %}</strong>
+        <span>{% translate "Every possible match is checked by a trained person first." %}</span>
+      </li>
+    </ol>
+
+    <a class="readmore" href="{% url 'how-it-works' %}">
+      {% translate "Read how it works" %}
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</section>

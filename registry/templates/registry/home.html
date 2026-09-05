@@ -3,18 +3,13 @@
 
 {% block title %}{% translate "Khoj — search for a missing person in one place" %}{% endblock %}
 
-{% block rail %}{% include "registry/_band_rail.html" %}{% endblock %}
-
 {% block content %}
+  {# Four sections and the telephone routes. Everything explanatory is a
+     link now; the detail pages have room the home page does not. #}
   {% include "registry/_band_event.html" %}
   {% include "registry/_band_hero.html" %}
   {% include "registry/_band_counters.html" %}
-  {% include "registry/_band_problem.html" %}
-  {% include "registry/_band_how.html" %}
-  {% include "registry/_band_match.html" %}
-  {% include "registry/_band_signals.html" %}
-  {% include "registry/_band_coverage.html" %}
-  {% include "registry/_band_trust.html" %}
+  {% include "registry/_band_steps_brief.html" %}
+  {% include "registry/_band_handoff.html" %}
   {% include "registry/_band_offline.html" %}
-  {% include "registry/_band_questions.html" %}
 {% endblock %}
