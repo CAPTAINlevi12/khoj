@@ -1,8 +1,7 @@
 # Fix list — review of the generic-registry work
 
-Reviewed at commit `91d731d`. Three defects, one coupling risk, one question
-for Abhinav. Ordered by priority. Each one says *why* it matters, not just
-what to change.
+Reviewed at `91d731d`, revised at `1e0b2a2`. One defect outstanding, one
+coupling risk, one question for Abhinav.
 
 The generalisation itself is good and none of this touches it. `Region` as a
 self-referencing tree, `Event.geography_rule` turning `kind` into a behaviour
@@ -11,82 +10,34 @@ partial unique index on `is_primary` are all right. Leave them alone.
 
 ---
 
-## 1 — The "last updated" stamp is hardcoded and lies · HIGH
+## Already fixed — the hardcoded "last updated" stamp
 
-**Where**
-- `templates/base.html:143`
-- `registry/templates/registry/_band_counters.html:30`
+Landed in `1e0b2a2` before this list was written. `Event.updated_at`, a
+`data_updated_at` property, a `secondary_calendar` field and a `{% stamp %}`
+template tag; no `Bhadra` string survives anywhere in the code.
 
-Both contain the literal string `29 Bhadra 2083 · 29 Aug 2026, 14:20`.
-
-**Why it matters.** The comment directly above it in `_band_counters.html`
-says it: *"An emergency page has to timestamp itself: a visitor has no other
-way to tell a live service from an abandoned one."* A stamp that always reads
-29 August does the opposite of its job — it is worse than having no stamp,
-because it actively asserts something false. It also survived a commit whose
-message says the last Nepal strings were removed: Bikram Sambat is the Nepali
-calendar, so this is both a lie and a leftover hardcode.
-
-**Fix**
-
-1. Add to `Event`:
-
-   ```python
-   updated_at = models.DateTimeField(auto_now=True)
-   ```
-
-   `auto_now=True` writes the current time on every save. Note what that
-   honestly means: *when this event's data last changed*, not when a report
-   arrived. That is the correct claim for this page today. When Phase 2 adds
-   reports, revisit it so it reflects the newest record instead.
-
-2. Render it from data in both templates:
-
-   ```django
-   {% translate "Last updated" %}
-   <time datetime="{{ primary_event.updated_at|date:'c' }}" class="mono">
-     {{ primary_event.updated_at|date:"j M Y, H:i" }}
-   </time>
-   ```
-
-   `primary_event` is already in every template via the context processor, so
-   `base.html` needs nothing new. Use a real `<time datetime="...">` element —
-   the machine-readable attribute is what makes the date meaningful to
-   screen readers and crawlers, and `|date:'c'` emits ISO 8601.
-
-3. **Drop the Bikram Sambat half for now.** Converting Gregorian to BS is a
-   lookup table, not arithmetic — month lengths vary year to year and cannot
-   be computed. Faking it would produce wrong dates on a page whose whole
-   argument is that it does not print numbers it cannot stand behind.
-
-   When you do want it, add a real dependency (`nepali-datetime`) and put the
-   calendar on the event so it stays per-deployment:
-
-   ```python
-   class Calendar(models.TextChoices):
-       GREGORIAN = "GREGORIAN", _("Gregorian")
-       BIKRAM_SAMBAT = "BIKRAM_SAMBAT", _("Bikram Sambat")
-   ```
-
-   Then a template filter renders the second date only when the event asks
-   for it. A Türkiye deployment would never show BS.
+Solved better than it was going to be specified. Putting the calendar on the
+event is the right call — it keeps Bikram Sambat as a per-deployment choice
+rather than a global assumption, so a Türkiye deployment shows Gregorian only.
+No further action.
 
 ---
 
-## 2 — CRLF line endings are poisoning every diff · HIGH
+## 1 — CRLF line endings are poisoning every diff · HIGH
 
-**Where**
-- `registry/migrations/0001_initial.py`
-- `registry/migrations/0002_event_hotline_*.py`
-- `templates/base.html`
+**Where** — `registry/migrations/0001_initial.py`,
+`registry/migrations/0002_event_hotline_*.py`, `templates/base.html`,
+`requirements.txt`, and spreading.
 
-**Why it matters.** `git diff` reports 264 changed lines across these files
+**Why it matters.** `git diff` reports ~296 changed lines across these files
 while `git diff --ignore-cr-at-eol` reports nothing at all — the content is
 identical and only the line endings differ. There is no `.gitattributes`, so
 Windows tooling keeps writing CRLF and Git keeps seeing whole-file rewrites.
+
 Left alone, every future diff on these files is unreviewable: a genuine
-one-line change is buried in hundreds of fake ones, and that is exactly how a
-real bug slips through review unnoticed.
+one-line change sits buried in hundreds of fake ones. That is precisely how a
+real bug survives review. The file list is growing — `requirements.txt` was
+not affected at the last review and is now.
 
 **Fix**
 
@@ -99,8 +50,9 @@ real bug slips through review unnoticed.
    *.pdf binary
    ```
 
-   `text=auto` lets Git decide what is text; `eol=lf` normalises it in the
-   repository. Working files on Windows are unaffected.
+   `text=auto` lets Git decide what counts as text; `eol=lf` normalises it
+   inside the repository. Working files on Windows are unaffected — this is a
+   storage-format setting, not an editor setting.
 
 2. Normalise what is already committed:
 
@@ -109,31 +61,29 @@ real bug slips through review unnoticed.
    git commit -m "chore: normalise line endings to LF"
    ```
 
-3. Confirm `git diff` is empty afterwards.
+3. Confirm `git diff` comes back empty afterwards.
 
-Do this as its own commit with nothing else in it, so the one noisy diff in
-the project's history is clearly labelled.
+Do this as its own commit containing nothing else, so the one unavoidably
+noisy diff in the project's history is clearly labelled as such.
 
 ---
 
-## 3 — The primary event is fetched twice per page load · LOW
+## 2 — The primary event is fetched twice per page load · LOW
 
-**Where**
-- `registry/views.py` — `Event.objects.filter(is_primary=True)...first()`
-- `registry/context_processors.py` — the same query again
+**Where** — `registry/views.py` (`Event.objects.filter(is_primary=True)...`)
+and `registry/context_processors.py`, which runs the same query again.
 
 **Why it matters.** The context processor runs for every template rendered
-through the engine, and `home()` already fetched the event with its
-prefetches. On the home page that is two queries where one would do, and the
-context processor's copy has no prefetch — so anything in `base.html` that
-touches a relation would trigger further queries.
+through the engine, and `home()` has already fetched the event *with* its
+prefetches. On the home page that is two queries where one would do — and the
+context processor's copy carries no prefetch, so anything in `base.html` that
+reaches into a relation triggers further queries.
 
 Small today. Worth fixing now because it is three lines, and because the
-pattern (view and context processor silently duplicating work) gets copied
-into every later page.
+pattern — a view and a context processor silently duplicating work — is the
+kind of thing that gets copied into every later page.
 
-**Fix.** Cache it in the context processor, keyed and short-lived, the same
-way `get_stats()` already does:
+**Fix.** Cache it, short-lived, exactly as `get_stats()` already does:
 
 ```python
 from django.core.cache import cache
@@ -148,42 +98,45 @@ def primary_event(request):
     }
 ```
 
-Caching a model instance is fine here — it is small and read-only on this
-path. Invalidate on `Event` save later if it becomes stale-sensitive.
+Caching a model instance is fine on this path — small, read-only. If it later
+becomes stale-sensitive, invalidate on `Event` save.
+
+Note this interacts with the stamp fix: a cached event means `data_updated_at`
+can lag by up to five minutes. That is acceptable for a page-level stamp, but
+it is a real trade and should be a deliberate one.
 
 ---
 
-## 4 — `RAIL_SECTIONS` and the band includes can drift apart · COUPLING RISK
+## 3 — `RAIL_SECTIONS` and the band includes can drift apart · COUPLING RISK
 
-**Where**
-- `registry/views.py` — the `RAIL_SECTIONS` list
-- `registry/templates/registry/home.html` — the `{% include %}` list
+**Where** — the `RAIL_SECTIONS` list in `registry/views.py`, and the
+`{% include %}` list in `registry/templates/registry/home.html`.
 
 Two hand-maintained lists describing the same page. Remove a band from the
 template and the scroll rail still advertises it, producing a nav link to an
 anchor that no longer exists. Nothing is broken today; the two lists agree.
 
-**Fix (only when the bands change).** Make one list the source of truth —
-each entry carries its anchor, its label and its template path, and
-`home.html` loops over it. Not worth doing until the band set actually
-changes, which is what question 5 decides.
+**Fix (only when the bands change).** Make one list the source of truth — each
+entry carrying its anchor, its label and its template path — and have
+`home.html` loop over it. Not worth doing until the band set actually changes,
+which is what question 4 decides.
 
 ---
 
-## 5 — The home page is back to ten bands · QUESTION, NOT A DEFECT
+## 4 — The home page is back to ten bands · QUESTION, NOT A DEFECT
 
 `home.html` includes: event, hero, counters, problem, how, match, signals,
 coverage, trust, offline, questions.
 
 Abhinav asked for a slim home page that hands off to detail pages, and the
-six-screen mockup did exactly that. The built page is the dense version
-again. That may be deliberate — but it drifted rather than being decided, so
-it should be settled explicitly before more is built on top of it.
+six-screen mockup did exactly that. The built page is the dense version again.
+That may well be deliberate — but it drifted rather than being decided, and it
+should be settled explicitly before more is built on top of it.
 
 **Do not change this without asking him.** If he wants it slim, the earlier
 plan stands: keep hero, counters and the offline routes on home; move how,
-match, signals, coverage, trust and questions to their own pages behind link
-cards. Then fix `RAIL_SECTIONS` per item 4.
+match, signals, coverage, trust and questions onto their own pages behind link
+cards. Then fix `RAIL_SECTIONS` per item 3.
 
 ---
 
@@ -194,7 +147,7 @@ cards. Then fix `RAIL_SECTIONS` per item 4.
   current state means it silently follows nobody.
 - `Organisation.record_count` returns a hardcoded `0`. Correct and honestly
   documented until Phase 3 creates `UnidentifiedRecord`. Leave it.
-- The word "Nepal" remains in docstrings and comments in `models.py`,
-  `views.py`, `settings.py` and `_band_event.html`. Those are explanations of
-  why the design is shaped as it is, not hardcoded behaviour. Keep them —
-  they are the reason the abstraction is understandable.
+- The word "Nepal" remains in docstrings and comments across `models.py`,
+  `views.py`, `settings.py` and `_band_event.html`. Those explain *why* the
+  design is shaped as it is; they are not hardcoded behaviour. Keep them —
+  they are what makes the abstraction understandable to the next reader.
