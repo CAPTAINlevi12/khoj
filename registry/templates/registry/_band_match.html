@@ -7,8 +7,8 @@
       <p>{% blocktranslate %}Two invented records, and the same scoring rules the real system uses. A tattoo is worth more than a height estimate — which is why the details you remember matter more than the ones you guess.{% endblocktranslate %}</p>
     </div>
 
-    {# With JS off this whole demo collapses to the weights table below,
-       which states the same lesson without any interaction. #}
+    {% comment %} With JS off this whole demo collapses to the weights table below,
+       which states the same lesson without any interaction. {% endcomment %}
     <div class="demo-nojs panel">
       <h3>{% translate "What each signal is worth" %}</h3>
       <table>
@@ -127,8 +127,8 @@
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Tattoo, bird, left forearm" %}</span></li>
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Checked shirt (red/black), denim trousers" %}</span></li>
           <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% translate "Estimated age 30 to 40" %}</span></li>
-          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{# The geography signal reads Event.geography_rule, so the demo has to say
-   what that rule actually is. "Downstream" is nonsense in an earthquake. #}
+          <li><span class="attr" aria-hidden="true"><span class="tick">{% include "registry/_tick.html" %}</span>{% comment %} The geography signal reads Event.geography_rule, so the demo has to say
+   what that rule actually is. "Downstream" is nonsense in an earthquake. {% endcomment %}
 {% if event.geography_rule == "downstream" %}{% translate "Recovered 31 km downstream of the last-seen point" %}
 {% elif event.geography_rule == "downslope" %}{% translate "Recovered downslope of the last-seen point" %}
 {% else %}{% translate "Recovered 2 km from the last-seen point" %}{% endif %}</span></li>

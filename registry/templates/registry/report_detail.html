@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ report.full_name }} — Khoj{% endblock %}
+
+{% block content %}
+  <div class="wrap page" style="max-width:46rem">
+    <div class="card-plain">
+      <div style="display:flex;gap:1rem;align-items:baseline;flex-wrap:wrap">
+        <h1 style="font-size:1.375rem;margin:0">
+          {{ report.full_name }}{% if report.age %}, {{ report.age }}{% endif %}
+        </h1>
+        <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+      </div>
+      <p class="note" style="margin:.4rem 0 0">
+        {% translate "Filed" %} {{ report.created_at|date:"j M Y" }} ·
+        <span class="mono">{{ report.reference }}</span>
+      </p>
+
+      {% comment %} Honest status, never false comfort. "Searching" is true; "no match
+         found" is a verdict the system has not earned. {% endcomment %}
+      <ol class="timeline">
+        <li><b>{{ report.created_at|date:"j M H:i" }}</b> {% translate "Report received and entered into the registry" %}</li>
+        {% if report.status != "DRAFT" %}
+          <li><b>{{ report.updated_at|date:"j M H:i" }}</b>
+            {% blocktranslate count n=facility_count|default:0 %}Automatic search begun{% plural %}Automatic search begun across connected facilities{% endblocktranslate %}</li>
+        {% endif %}
+        {% if report.status == "UNDER_REVIEW" %}
+          <li><b>—</b> {% translate "A possible match is being reviewed by an official. You will be contacted directly by telephone. Please do not travel." %}</li>
+        {% endif %}
+      </ol>
+
+      <dl class="review">
+        <dt>{% translate "Also known as" %}</dt><dd>{{ report.also_known_as|default:"—" }}</dd>
+        <dt>{% translate "Sex" %}</dt><dd>{{ report.get_sex_display }}</dd>
+        <dt>{% translate "Height" %}</dt><dd>{% if report.height_cm %}{{ report.height_cm }} cm{% else %}—{% endif %}</dd>
+        <dt>{% translate "Build" %}</dt><dd>{{ report.get_build_display }}</dd>
+        <dt>{% translate "Last seen" %}</dt>
+        <dd>{{ report.last_seen_location|default:"—" }}{% if report.last_seen_region %} · {{ report.last_seen_region.name }}{% endif %}</dd>
+        <dt>{% translate "Clothing" %}</dt><dd>{{ report.clothing_description|default:"—" }}</dd>
+        <dt>{% translate "Marks" %}</dt><dd>{{ report.distinguishing_marks|default:"—" }}</dd>
+        <dt>{% translate "Contact" %}</dt><dd class="mono">{{ report.contact_phone|default:"—" }}</dd>
+      </dl>
+
+      {% if report.photos.all %}
+        <h2 style="font-size:1rem;margin-top:1.5rem">{% translate "Photographs" %}</h2>
+        <div class="photo-grid">
+          {% for photo in report.photos.all %}
+            <figure>
+              <img src="{{ photo.image.url }}" alt="{% translate 'Photograph supplied by the family' %}">
+              {% if photo.caption %}<figcaption class="note">{{ photo.caption }}</figcaption>{% endif %}
+            </figure>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.5rem">
+        {% if report.status == "DRAFT" %}
+          <a class="btn btn-primary" href="{% url 'report-submit' report.pk %}">{% translate "Review and file" %}</a>
+        {% endif %}
+        {% if report.is_editable %}
+          <a class="btn" href="{% url 'report-step' report.pk 1 %}">{% translate "Edit" %}</a>
+        {% endif %}
+        {% if report.status != "WITHDRAWN" %}
+          <form method="post" action="{% url 'report-withdraw' report.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn">{% translate "Withdraw this report" %}</button>
+          </form>
+        {% endif %}
+        <a class="btn btn-quiet" href="{% url 'report-list' %}">{% translate "All my reports" %}</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

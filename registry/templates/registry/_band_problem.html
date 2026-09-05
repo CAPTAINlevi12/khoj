@@ -14,9 +14,9 @@
     <div class="compare">
       <div class="panel">
         <h3>{% translate "Without a registry" %}</h3>
-        {# The route a family had to drive, built from the event's own regions
+        {% comment %} The route a family had to drive, built from the event's own regions
            rather than typed in — otherwise this line lies on every other
-           deployment. #}
+           deployment. {% endcomment %}
         <p class="panel-sub">
           {% for r in event.regions.all %}{{ r.name }}{% if not forloop.last %} → {% endif %}{% endfor %}
         </p>
@@ -73,8 +73,8 @@
       </div>
     </div>
 
-    {# Sources come from the rows themselves, so a figure can never appear
-       on this page without one attached to it. #}
+    {% comment %} Sources come from the rows themselves, so a figure can never appear
+       on this page without one attached to it. {% endcomment %}
     <p class="note" style="margin-top:1.25rem">
       {% translate "Figures as reported by" %}
       {% regroup event.figures.all by source as source_list %}

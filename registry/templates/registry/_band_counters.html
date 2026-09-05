@@ -1,8 +1,8 @@
 {% load i18n khoj_dates %}
 <section class="band band-tint" id="numbers" data-band>
   <div class="wrap">
-    {# The final value is rendered server-side; the count-up only animates
-       toward a number that is already correct with JS off. #}
+    {% comment %} The final value is rendered server-side; the count-up only animates
+       toward a number that is already correct with JS off. {% endcomment %}
     <dl class="counters">
       <div class="counter">
         <dt>{% translate "Reports filed" %}</dt>
@@ -23,8 +23,8 @@
     </dl>
 
     <div class="stamp">
-      {# An emergency page has to timestamp itself: a visitor has no other
-         way to tell a live service from an abandoned one. #}
+      {% comment %} An emergency page has to timestamp itself: a visitor has no other
+         way to tell a live service from an abandoned one. {% endcomment %}
       <p class="note" style="margin:0">
         {% translate "Last updated" %}
         <span class="mono">{% stamp event.data_updated_at event.secondary_calendar %}</span>

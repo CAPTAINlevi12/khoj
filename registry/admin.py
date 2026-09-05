@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Event, Organisation, Region
+from .models import Event, MissingPersonReport, Organisation, Region, ReportPhoto
 
 
 @admin.register(Region)
@@ -26,3 +26,22 @@ class OrganisationAdmin(admin.ModelAdmin):
     # A plain ForeignKey renders as a <select> holding every row. Fine at four
     # districts, unusable at four thousand, so it gets a lookup widget now.
     autocomplete_fields = ("region",)
+
+
+class ReportPhotoInline(admin.TabularInline):
+    model = ReportPhoto
+    extra = 0
+
+
+@admin.register(MissingPersonReport)
+class MissingPersonReportAdmin(admin.ModelAdmin):
+    list_display = ("reference", "full_name", "age", "status", "event", "created_at")
+    list_filter = ("status", "event", "sex")
+    search_fields = ("full_name", "also_known_as", "distinguishing_marks")
+    autocomplete_fields = ("last_seen_region",)
+    inlines = [ReportPhotoInline]
+    readonly_fields = ("created_at", "updated_at")
+
+    @admin.display(description="Reference")
+    def reference(self, obj):
+        return obj.reference

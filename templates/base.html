@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% translate "Khoj" %}{% endblock %}</title>
 
-  {# Runs before first paint so a dark-mode visitor never sees a light
+  {% comment %} Runs before first paint so a dark-mode visitor never sees a light
      flash, and so CSS can style JS-on states without waiting for the
-     deferred script. #}
+     deferred script. {% endcomment %}
   <script>
     (function () {
       var r = document.documentElement;
@@ -119,8 +119,8 @@
           </ul>
         </div>
 
-        {# Sources come from the figures actually shown on the page, so this
-           list can never drift away from what it is citing. #}
+        {% comment %} Sources come from the figures actually shown on the page, so this
+           list can never drift away from what it is citing. {% endcomment %}
         {% if primary_event.figures.all %}
           <div>
             <h4>{% translate "Sources" %}</h4>

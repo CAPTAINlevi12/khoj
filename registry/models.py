@@ -245,3 +245,156 @@ class HelpDesk(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# Shared vocabulary. MissingPersonReport and UnidentifiedRecord must describe
+# a person in the SAME words, or the matching engine has nothing to compare.
+# Defining these once is what makes that guarantee structural rather than a
+# thing someone has to remember.
+class Sex(models.TextChoices):
+    MALE = "MALE", _("Male")
+    FEMALE = "FEMALE", _("Female")
+    OTHER = "OTHER", _("Other")
+    UNKNOWN = "UNKNOWN", _("Not known")
+
+
+class Build(models.TextChoices):
+    SLIGHT = "SLIGHT", _("Slight")
+    MEDIUM = "MEDIUM", _("Medium")
+    HEAVY = "HEAVY", _("Heavy")
+    UNKNOWN = "UNKNOWN", _("Not known")
+
+
+class MissingPersonReport(models.Model):
+    """The family's side: one person someone is looking for.
+
+    Almost every field is optional, and that is a domain decision rather than
+    laziness — principle 4, blank beats guessed. A confidently wrong height
+    pushes the right record down the ranking, while a blank one simply carries
+    no weight. The forms must make "I don't know" easy, so the model has to
+    permit it.
+    """
+
+    class Status(models.TextChoices):
+        DRAFT = "DRAFT", _("Draft")
+        SEARCHING = "SEARCHING", _("Searching")
+        UNDER_REVIEW = "UNDER_REVIEW", _("A possible match is being reviewed")
+        CONTACTED = "CONTACTED", _("You have been contacted")
+        RESOLVED = "RESOLVED", _("Identified")
+        WITHDRAWN = "WITHDRAWN", _("Withdrawn")
+
+    # --- who filed it, and for which disaster -----------------------------
+    # CASCADE would delete someone's report if their account went; PROTECT
+    # refuses to delete the account instead. Losing a missing-person report as
+    # a side effect of an account deletion is not acceptable.
+    reporter = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.PROTECT,
+        related_name="reports",
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.PROTECT,
+        related_name="reports",
+        # Indexed because Phase 4 scores within one event, so every engine
+        # query filters on this column.
+        db_index=True,
+    )
+
+    # --- step 1 · who -----------------------------------------------------
+    full_name = models.CharField(max_length=160)
+    also_known_as = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text=_("Nicknames, or other spellings of the name."),
+    )
+    age = models.PositiveSmallIntegerField(null=True, blank=True)
+    sex = models.CharField(max_length=10, choices=Sex.choices, default=Sex.UNKNOWN)
+    height_cm = models.PositiveSmallIntegerField(null=True, blank=True)
+    build = models.CharField(max_length=10, choices=Build.choices, default=Build.UNKNOWN)
+
+    # --- step 2 · where last seen -----------------------------------------
+    last_seen_at = models.DateTimeField(null=True, blank=True)
+    last_seen_location = models.CharField(max_length=200, blank=True)
+    last_seen_region = models.ForeignKey(
+        Region,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="reports_last_seen",
+    )
+
+    # --- step 3 · appearance ----------------------------------------------
+    clothing_description = models.TextField(blank=True)
+    distinguishing_marks = models.TextField(
+        blank=True,
+        help_text=_("Scars, tattoos, dental work, old injuries, anything unusual."),
+    )
+
+    # --- step 4 · contact -------------------------------------------------
+    contact_phone = models.CharField(max_length=32, blank=True)
+    contact_note = models.CharField(max_length=200, blank=True)
+
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.DRAFT
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            # The family dashboard filters by reporter; the engine filters by
+            # event and status. Composite indexes matching those exact queries.
+            models.Index(fields=["reporter", "-created_at"]),
+            models.Index(fields=["event", "status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.reference} · {self.full_name}"
+
+    @property
+    def reference(self):
+        """The code a family quotes on the telephone.
+
+        Derived from the primary key rather than stored. Note this is a
+        DISPLAY label, not a security boundary: it is guessable, and the thing
+        that stops one family reading another's report is the queryset filter
+        in the view, never the unguessability of this string.
+        """
+        return f"KHJ-{self.pk}"
+
+    @property
+    def is_editable(self):
+        """A family may edit while nobody official is acting on it.
+
+        Once a verifier is reviewing a candidate, edits would move the ground
+        under a decision in progress.
+        """
+        return self.status in {self.Status.DRAFT, self.Status.SEARCHING}
+
+
+class ReportPhoto(models.Model):
+    """A photograph supplied by the family.
+
+    Separate model rather than an ImageField on the report, because a family
+    may have several photographs and "how many" is not knowable in advance.
+
+    upload_to keeps them under MEDIA_ROOT for now. Phase 7 moves this store
+    outside the public media root entirely and serves it through a
+    permission-checked view, because a guessable URL to a photograph is the
+    same leak as an unscoped queryset.
+    """
+
+    report = models.ForeignKey(
+        MissingPersonReport, on_delete=models.CASCADE, related_name="photos"
+    )
+    image = models.ImageField(upload_to="reports/%Y/%m/")
+    caption = models.CharField(max_length=200, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["uploaded_at"]
+
+    def __str__(self):
+        return f"Photo for {self.report.reference}"

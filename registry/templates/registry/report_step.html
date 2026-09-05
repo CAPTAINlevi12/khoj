@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "New report — Khoj" %}{% endblock %}
+
+{% block content %}
+  <div class="wrap page" style="max-width:46rem">
+    <ol class="wizard-steps">
+      {% for n, label in steps %}
+        <li class="{% if n == step %}current{% elif n < step %}done{% endif %}">
+          <span class="mono">{{ n }}</span> {{ label }}
+        </li>
+      {% endfor %}
+    </ol>
+
+    <div class="card-plain">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+            {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+          </div>
+        {% endfor %}
+
+        <p class="note">{% blocktranslate %}Not sure of a value? Leave it blank. A blank field is far better than a guess — a wrong number pushes the right match down the list.{% endblocktranslate %}</p>
+
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.25rem">
+          <button type="submit" class="btn btn-primary">
+            {% if step == last_step %}{% translate "Review and file" %}{% else %}{% translate "Save and continue" %}{% endif %}
+          </button>
+          <button type="submit" name="save_draft" value="1" class="btn">
+            {% translate "Save and finish later" %}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {% if step == 3 %}
+      <div class="card-plain" style="margin-top:1rem">
+        <h2 style="font-size:1rem">{% translate "Photographs" %}</h2>
+        <p class="note">{% translate "Face visible, any age. A photograph is never shown publicly." %}</p>
+
+        {% if report.photos.all %}
+          <ul class="facility-list" style="margin-bottom:1rem">
+            {% for photo in report.photos.all %}
+              <li><span>{{ photo.image.name|cut:"reports/" }}</span>
+                  <span class="count">{{ photo.uploaded_at|date:"j M H:i" }}</span></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'report-photo' report.pk %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% for field in photo_form %}
+            <div class="field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+            </div>
+          {% endfor %}
+          <button type="submit" class="btn">{% translate "Add photograph" %}</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

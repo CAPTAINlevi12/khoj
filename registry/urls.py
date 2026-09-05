@@ -15,4 +15,15 @@ urlpatterns = [
     path("coverage/", views.coverage, name="coverage"),
     path("privacy/", views.privacy, name="privacy"),
     path("questions/", views.questions, name="questions"),
+
+    # Phase 2 · a family's own reports. Every one of these resolves through a
+    # queryset filtered to request.user, so the pk in the URL is not a secret
+    # and does not need to be.
+    path("reports/", views.ReportListView.as_view(), name="report-list"),
+    path("reports/new/", views.report_start, name="report-start"),
+    path("reports/<int:pk>/", views.ReportDetailView.as_view(), name="report-detail"),
+    path("reports/<int:pk>/step/<int:step>/", views.ReportStepView.as_view(), name="report-step"),
+    path("reports/<int:pk>/submit/", views.ReportSubmitView.as_view(), name="report-submit"),
+    path("reports/<int:pk>/photo/", views.ReportPhotoView.as_view(), name="report-photo"),
+    path("reports/<int:pk>/withdraw/", views.ReportWithdrawView.as_view(), name="report-withdraw"),
 ]

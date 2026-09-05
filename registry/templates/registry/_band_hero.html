@@ -1,8 +1,8 @@
 {% load i18n %}
 <section class="hero" id="hero" data-band>
-  {# The one ambient flourish on the page, and it earns its place because it
+  {% comment %} The one ambient flourish on the page, and it earns its place because it
      is the system: two populations of records converging on one point.
-     Drawn from a visible resting state, never from opacity 0. #}
+     Drawn from a visible resting state, never from opacity 0. {% endcomment %}
   <svg class="hero-bg" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice"
        aria-hidden="true" focusable="false">
     <circle cx="90" cy="100" r="3"/><circle cx="1110" cy="100" r="3"/>
@@ -54,8 +54,8 @@
       </a>
     </div>
 
-    {# What the site is actually for. Someone is deciding right now whether
-       to get on a bus. This does not move below the fold. #}
+    {% comment %} What the site is actually for. Someone is deciding right now whether
+       to get on a bus. This does not move below the fold. {% endcomment %}
     <p class="no-travel">{% translate "You do not need to travel." %}</p>
   </div>
 </section>

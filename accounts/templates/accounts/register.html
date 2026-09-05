@@ -9,10 +9,10 @@
       <h1 style="font-size:1.5rem">{% translate "Create an account" %}</h1>
       <p class="note">{% blocktranslate %}You need an account so that only you can see your report, and so an official knows how to reach you.{% endblocktranslate %}</p>
 
-      {# csrf_token: a hidden input carrying a per-session secret token.
+      {% comment %} csrf_token: a hidden input carrying a per-session secret token.
          CsrfViewMiddleware rejects any POST that doesn't echo it back, which
          is what stops another site from silently submitting this form using
-         a signed-in visitor's cookies without them knowing. #}
+         a signed-in visitor's cookies without them knowing. {% endcomment %}
       <form method="post" novalidate style="margin-top:1.5rem">
         {% csrf_token %}
         {{ form.non_field_errors }}
