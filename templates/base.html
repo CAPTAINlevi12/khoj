@@ -1,4 +1,4 @@
-{% load static i18n %}<!doctype html>
+{% load static i18n khoj_dates %}<!doctype html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8">
@@ -139,8 +139,10 @@
       <p class="disclaimer">
         {% blocktranslate %}Reference design and training project, running on seeded fictional data. This is not an official registry and does not accept real reports.{% endblocktranslate %}
         <br>
-        {% translate "Last updated" %}
-        <span class="mono">29 Bhadra 2083 · 29 Aug 2026, 14:20</span>
+        {% if primary_event %}
+          {% translate "Last updated" %}
+          <span class="mono">{% stamp primary_event.data_updated_at primary_event.secondary_calendar %}</span>
+        {% endif %}
       </p>
     </div>
   </footer>

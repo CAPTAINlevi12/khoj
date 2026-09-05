@@ -96,6 +96,9 @@ class Command(BaseCommand):
                 "is_primary": True,
                 "hotline_phone": "01-XXXXXXX",
                 "hotline_hours": "Every day, 6:00 to 20:00",
+                # Nepali readers expect Bikram Sambat beside the Gregorian
+                # date. A deployment elsewhere leaves this as NONE.
+                "secondary_calendar": Event.Calendar.BIKRAM_SAMBAT,
                 "summary": (
                     "A glacier collapse on the north face of Langtang-Lirung sent a "
                     "debris flow down the Bhotekoshi and Trishuli valleys, across "

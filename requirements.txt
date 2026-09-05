@@ -2,3 +2,6 @@ Django==6.1
 python-dotenv==1.0.1
 Pillow==12.3.0
 psycopg2-binary==2.9.12
+# Optional: only needed where Event.secondary_calendar is BIKRAM_SAMBAT.
+# Guarded import in registry/templatetags/khoj_dates.py.
+nepali-datetime==1.0.8.5

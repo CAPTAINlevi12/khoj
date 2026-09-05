@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n khoj_dates %}
 <section class="band band-tint" id="numbers" data-band>
   <div class="wrap">
     {# The final value is rendered server-side; the count-up only animates
@@ -27,7 +27,7 @@
          way to tell a live service from an abandoned one. #}
       <p class="note" style="margin:0">
         {% translate "Last updated" %}
-        <span class="mono">29 Bhadra 2083 · 29 Aug 2026, 14:20</span>
+        <span class="mono">{% stamp event.data_updated_at event.secondary_calendar %}</span>
       </p>
       <p class="note" style="margin:0">
         {% translate "Counts are zero because this reference build holds no records." %}

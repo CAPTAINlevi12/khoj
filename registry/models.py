@@ -86,6 +86,22 @@ class Event(models.Model):
     hotline_phone = models.CharField(max_length=32, blank=True)
     hotline_hours = models.CharField(max_length=120, blank=True)
 
+    # auto_now=True means Django overwrites this with "now" on every save().
+    # Note that it is a *field*, not a property: it is stored, so it can be
+    # ordered and filtered on, unlike something computed in Python.
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Which second calendar this deployment's readers expect beside the
+    # Gregorian date. Nepal reads Bikram Sambat; Türkiye does not, and
+    # printing BS dates there would be nonsense.
+    class Calendar(models.TextChoices):
+        NONE = "NONE", _("Gregorian only")
+        BIKRAM_SAMBAT = "BIKRAM_SAMBAT", _("Bikram Sambat and Gregorian")
+
+    secondary_calendar = models.CharField(
+        max_length=20, choices=Calendar.choices, default=Calendar.NONE
+    )
+
     # The event the bare landing page describes when it has to pick one.
     # Several events can be ACTIVE at once — a country can have two disasters
     # — so "active" cannot double as "the one to show".
@@ -106,6 +122,22 @@ class Event(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def data_updated_at(self):
+        """When the data behind this event last changed.
+
+        The landing page stamps itself so a visitor can tell a live service
+        from an abandoned one — which means this must reflect real activity,
+        not the moment the page was rendered. "Now" on every request would be
+        a freshness signal that is true even for a dead site, which is the
+        same lie as a frozen date pointing the other way.
+
+        Right now only the event row itself carries a timestamp. Phases 2 and
+        3 fold in the newest report and record, and this is where that goes:
+        max(self.updated_at, latest report, latest record).
+        """
+        return self.updated_at
 
     @property
     def geography_rule(self):
